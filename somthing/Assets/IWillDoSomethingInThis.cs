@@ -226,7 +226,39 @@ public class IWillDoSomethingInThis : MonoBehaviour
             findWay3();
         }
     }
-
+// public int dotGreen1X = 1;
+    // public int dotGreen1Y = 0;
+    //
+    // public float dotGreen2X = 4;
+    // public float dotGreen2Y = 4;
+    //
+    // public float dotBlue1X = 4;
+    // public float dotBlue1Y = 0;
+    //
+    // public float dotBlue2X = 3;
+    // public float dotBlue2Y = 2;
+    //
+    // public float dotOrange1X = 3;
+    // public float dotOrange1Y = 1;
+    //
+    // public float dotOrange2X = 2;
+    // public float dotOrange2Y = 3;
+    // var distanceBetween2GreenDots = Math.Sqrt(Math.Pow(Math.Abs(dotGreen1X - dotGreen2X), 2) + Math.Pow(Math.Abs(dotGreen1Y - dotGreen2Y), 2));
+    // var distanceBetween2BlueDots = Math.Sqrt(Math.Pow(Math.Abs(dotBlue1X - dotBlue2X), 2) + Math.Pow(Math.Abs(dotBlue1Y - dotBlue2Y), 2));
+    // var distanceBetween2OrangeDots = Math.Sqrt(Math.Pow(Math.Abs(dotOrange1X - dotOrange2X), 2) + Math.Pow(Math.Abs(dotOrange1Y - dotOrange2Y), 2));
+    //
+    // //Debug.Log(distanceBetween2GreenDots);
+    // //Debug.Log(distanceBetween2BlueDots);
+    // //Debug.Log(distanceBetween2OrangeDots);
+    // var dotOrange1 = new dots(dotOrange1X, dotOrange1Y);
+    // var dotOrange2 = new dots(dotOrange2X, dotOrange2Y);
+    // Astar(dotOrange1, dotOrange2, 3);
+    // var dotBlue1 = new dots(dotBlue1X, dotBlue1Y);
+    // var dotBlue2 = new dots(dotBlue2X, dotBlue2Y);
+    // Astar(dotBlue1, dotBlue2, 2);
+    // var dotGreen1 = new dots(dotGreen1X, dotGreen1Y);
+    // var dotGreen2 = new dots(dotGreen2X, dotGreen2Y);
+    // Astar(dotGreen1, dotGreen2, 1);
 
 
 }

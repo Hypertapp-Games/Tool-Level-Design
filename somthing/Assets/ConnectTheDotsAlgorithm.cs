@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ConnectTheDotsAlgorithm : MonoBehaviour
 {
+    [Serializable]
     public struct dots
     {
         public float x;
@@ -16,6 +18,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             this.y = y;
         }
     }
+    [Serializable]
     public struct value
     {
         public dots start;
@@ -29,47 +32,53 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             this.distance = distance;
         } 
     }
-    
+ 
     [SerializeField] private int[,] number;
-    public int dotGreen1X = 0;
-    public int dotGreen1Y = 0;
+    
+    [Serializable]
+    public struct  adot
+    {
+        public float x;
+        public float y;
+        public int value;
 
-    public float dotGreen2X = 4;
-    public float dotGreen2Y = 4;
+        public adot(float x, float y, int value)
+        {
+            this.x = x;
+            this.y = y;
+            this.value = value;
+        } 
+    }
+    
+    [Serializable]
+    public struct  coupledots
+    {
+        public adot start;
+        public adot end;
+        public int value;
+        public float distance;
+        
 
-    public float dotBlue1X = 0;
-    public float dotBlue1Y = 4;
-
-    public float dotBlue2X = 2;
-    public float dotBlue2Y = 3;
-
-    public float dotOrange1X = 1;
-    public float dotOrange1Y = 3;
-
-    public float dotOrange2X = 3;
-    public float dotOrange2Y = 2;
+        public coupledots(adot start, adot end, int value)
+        {
+            this.start = start;
+            this.end = end;
+            this.value = value;
+            distance = (float)Math.Sqrt(Math.Pow(Math.Abs(start.x - end.x), 2) + Math.Pow(Math.Abs(start.y - end.y), 2));
+        } 
+    }
 
     void Start()
     {
         number = new int[5, 5]
       {
             { 1, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0 },
+            { 5, 0, 0, 5, 0 },
             { 0, 0, 0, 3, 0 },
             { 0, 3, 2, 0, 0 },
             { 2, 0, 0, 0, 1 }
       };
-
-        var distanceBetween2GreenDots = Math.Sqrt(Math.Pow(Math.Abs(dotGreen1X - dotGreen2X), 2) + Math.Pow(Math.Abs(dotGreen1Y - dotGreen2Y), 2));
-        var distanceBetween2BlueDots = Math.Sqrt(Math.Pow(Math.Abs(dotBlue1X - dotBlue2X), 2) + Math.Pow(Math.Abs(dotBlue1Y - dotBlue2Y), 2));
-        var distanceBetween2OrangeDots = Math.Sqrt(Math.Pow(Math.Abs(dotOrange1X - dotOrange2X), 2) + Math.Pow(Math.Abs(dotOrange1Y - dotOrange2Y), 2));
-
-        //Debug.Log(distanceBetween2GreenDots);
-        //Debug.Log(distanceBetween2BlueDots);
-        //Debug.Log(distanceBetween2OrangeDots);
-        var dotOrange1 = new dots(dotOrange1X, dotOrange1Y);
-        var dotOrange2 = new dots(dotOrange2X, dotOrange2Y);
-        Astar(dotOrange1, dotOrange2, 3);
+        CheckAllDotInMatrix();
     }
     public void DeBugNumberAray()
     {
@@ -79,66 +88,144 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
         Debug.Log("       " + number[3, 0] + "       " + number[3, 1] + "       " + number[3, 2] + "       " + number[3, 3] + "       " + number[3, 4]);
         Debug.Log("       " + number[4, 0] + "       " + number[4, 1] + "       " + number[4, 2] + "       " + number[4, 3] + "       " + number[4, 4]);
     }
-    private void Update()
+    // private void Update()
+    // {
+    //     if (Input.GetKeyDown(KeyCode.A))
+    //     {
+    //         DeBugNumberAray();
+    //     }
+    // }
+
+    public List<adot> allDotInMatrix = new List<adot>();
+    
+    //Kiem tra xem co bao nhieu dot tren ma tran
+    public void CheckAllDotInMatrix()
     {
-        if (Input.GetKeyDown(KeyCode.A))
+        for(int i = 0; i< 5; i++)
         {
-            DeBugNumberAray();
-        }
-    }
-    public void Astar(dots Start, dots End , int value)
-    {
-        var CurrentDot = Start;
-        List <value> Q = new List<value>(); // list cac dot dang xet 
-        List <value> dotExpanded = new List<value>(); //list cac dot da xet
-
-
-        List<value> allDot = new List<value>();// tat ca cac dot da va dang xet
-
-        AstarLoop(Start, End, Q, CurrentDot, dotExpanded, allDot, value);
-    }
-    public void AstarLoop(dots Start, dots End, List<value> Q, dots CurrentDot, List<value> dotExpanded, List<value> allDot, int value)
-    {
-        ConsiderAdjacentDot(1, 0, Start, Q, CurrentDot, allDot);
-        ConsiderAdjacentDot(-1, 0, Start, Q, CurrentDot, allDot);
-        ConsiderAdjacentDot(0, 1, Start, Q, CurrentDot, allDot);
-        ConsiderAdjacentDot(0, -1, Start, Q, CurrentDot, allDot);
-
-        float minDis = 10000;
-        int index = 0;
-        for (int i = 0; i < Q.Count; i++)
-        {
-            if(Q[i].distance < minDis)
+            for (int j = 0; j < 5; j++)
             {
-                minDis = Q[i].distance;
-                index = i;
+                if (number[i, j] != 0)
+                {
+                    var newdot = new adot(i, j, number[i, j]);
+                    allDotInMatrix.Add(newdot);
+                }
             }
         }
-        dotExpanded.Add(Q[index]);
-        if (Q[index].end.x == End.x && Q[index].end.y == End.y)
+
+        CheckAllCoupleDotInMatrix();
+    }
+    // kiem tra xem co bao nhieu cap dot
+    public List<coupledots> allCoupleDotInMatrix = new List<coupledots>();
+    public void CheckAllCoupleDotInMatrix()
+    {
+        int value = allDotInMatrix[0].value;
+        for(int i = 1; i< allDotInMatrix.Count; i++)
         {
-            Debug.Log("Da den dich");
-            List<dots> Result = new List<dots>();
-            var dotEnd = dotExpanded[dotExpanded.Count - 1].end;
-            var dotStart = dotExpanded[dotExpanded.Count - 1].start;
+            if (allDotInMatrix[i].value == value)
+            {
+                var newcoupledot = new coupledots(allDotInMatrix[0], allDotInMatrix[i], value);
+                allCoupleDotInMatrix.Add(newcoupledot);
+                allDotInMatrix.Remove(allDotInMatrix[i]);
+                allDotInMatrix.Remove(allDotInMatrix[0]);
+                break;
+            }
+        }
 
-            Result.Add(dotEnd);
-            Result.Add(dotStart);
-
-            var dot = dotExpanded[dotExpanded.Count - 1].start;
-            EndAstarLoop(Start,dot, dotExpanded, Result,value);
-        
+        if (allDotInMatrix.Count >= 2)
+        {
+            CheckAllCoupleDotInMatrix();
         }
         else
         {
-            Debug.Log(CurrentDot.x + "   " + CurrentDot.y);
-            CurrentDot = Q[index].end;
-            Q.Remove(Q[index]);
-            AstarLoop(Start, End, Q, CurrentDot, dotExpanded,allDot,value);
+            StartAstarByDistance();
+            DeBugNumberAray();//log maxtrix sau khi giai ra man hin de kiem tra
         }
-        Debug.Log(Q.Count);
     }
-    // duy lai duong di ngan nhat
+    // kiem tra nhung cap dot nao co khoang cach gan nhau nhat thi cho A* truoc, tang dan tu tap den cao
+    public void StartAstarByDistance()
+    {
+        var enum1 = from  cpdot  in allCoupleDotInMatrix
+            orderby cpdot.distance
+            select cpdot;
+
+        foreach (var e in enum1)
+        {
+            var dotStart = new dots(e.start.x, e.start.y);
+            var dotEnd = new dots(e.end.x, e.end.y);
+            Astar(dotStart, dotEnd, e.value);
+        }
+    }
+
+    public void Astar(dots Start, dots End , int value)
+    {
+        var CurrentDot = Start;
+        int CountLoop = 0;
+        List <value> Q = new List<value>(); // list cac dot dang xet 
+        List <value> dotExpanded = new List<value>(); //list cac dot da xet
+
+        List<value> allDot = new List<value>();// tat ca cac dot da va dang xet
+
+        AstarLoop(Start, End, Q, CurrentDot, dotExpanded, allDot, value,CountLoop);
+    }
+  
+    public void AstarLoop(dots Start, dots End, List<value> Q, dots CurrentDot, List<value> dotExpanded, List<value> allDot, int value, int CountLoop)
+    {
+        CountLoop++;
+        ConsiderAdjacentDot(1, 0, Start, Q, CurrentDot, allDot, value);
+        ConsiderAdjacentDot(-1, 0, Start, Q, CurrentDot, allDot,value);
+        ConsiderAdjacentDot(0, 1, Start, Q, CurrentDot, allDot,value);
+        ConsiderAdjacentDot(0, -1, Start, Q, CurrentDot, allDot,value);
+
+        float minDis = 10000;
+        int index = 0;
+
+        try
+        {
+            for (int i = 0; i < Q.Count; i++) // kiem tra nut nao dang la nut ngan nhat
+            {
+                if(Q[i].distance < minDis)
+                {
+                    minDis = Q[i].distance;
+                    index = i;
+                }
+            }
+            dotExpanded.Add(Q[index]); 
+        
+            if (Q[index].end.x == End.x && Q[index].end.y == End.y) // neu nut duoc xet la nut finish thi end loop
+            {
+                //Debug.Log("Da den dich");
+            
+                List<dots> Result = new List<dots>();
+                var dotEnd = dotExpanded[dotExpanded.Count - 1].end;
+                var dotStart = dotExpanded[dotExpanded.Count - 1].start;
+
+                Result.Add(dotEnd);
+                Result.Add(dotStart);
+
+                var dot = dotExpanded[dotExpanded.Count - 1].start;
+                EndAstarLoop(Start,dot, dotExpanded, Result,value);
+        
+            }
+            else
+            {
+                CurrentDot = Q[index].end;
+                Q.Remove(Q[index]);
+                if (CountLoop < 125) // gioi han so lan loop, neu nhieu qua 5*5 =125 tuc la da loi
+                {
+                    AstarLoop(Start, End, Q, CurrentDot, dotExpanded,allDot,value,CountLoop);
+               
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Loi giai sai");
+        }
+      
+      
+    }
+    // duyet lai duong di ngan nhat
     public void EndAstarLoop(dots Start,dots dot ,List<value> dotExpanded, List<dots> Result , int value)
     {
         for (int i = 0; i < dotExpanded.Count; i++)
@@ -179,18 +266,18 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     }
 
     // kiem tra cac doiot lien ke
-    public void ConsiderAdjacentDot(int x, int y , dots Start, List<value> Q, dots CurrentDot, List<value> allDot)
+    public void ConsiderAdjacentDot(int x, int y , dots Start, List<value> Q, dots CurrentDot, List<value> allDot, int value)
     {
         
         try
         {
-            if (number[(int)CurrentDot.x + x, (int)CurrentDot.y +y] == 0 )//&& (int)Start.x + x != CurrentDot.x && (int)Start.y + y != CurrentDot.y)
+            if (number[(int)CurrentDot.x + x, (int)CurrentDot.y +y] == 0  || number[(int)CurrentDot.x + x, (int)CurrentDot.y +y]  == value)//&& (int)Start.x + x != CurrentDot.x && (int)Start.y + y != CurrentDot.y)
             {
+                
                 
                 var endot = new dots(CurrentDot.x + x, CurrentDot.y + y);
                 if (!CheckDotInAllDot(endot, allDot))
                 {
-
                     var distance = Math.Abs(Start.x - endot.x) + Math.Abs(Start.y - endot.y) + Math.Sqrt(Math.Pow(Math.Abs(Start.x - endot.x), 2) + Math.Pow(Math.Abs(Start.y - endot.y), 2));
                     var _value = new value(CurrentDot, endot, (float)distance);
                     allDot.Add(_value);
@@ -206,20 +293,41 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     // kiem tra xem dot duoc xe da tung ton tai trong tat ca cac dot dang xet chua
     public bool CheckDotInAllDot(dots endot, List<value> allDot)
     {
-        
-        for(int i = 0; i< allDot.Count; i++)
+        bool right = true;
+        if (allDot.Count == 0)
         {
-            if (endot.x == allDot[i].start.x && endot.y == allDot[i].start.y)
-            {
-                return true;
-            }
-            else { return false; }
-            if (endot.x == allDot[i].end.x && endot.y == allDot[i].end.y)
-            {
-                return true;
-            }
-            else { return false; }
+            right = false;
         }
-        return false;
+        else
+        {
+            for(int i = 0; i< allDot.Count; i++)
+            {
+
+                if (endot.x == allDot[i].start.x && endot.y == allDot[i].start.y)
+                {
+                    right = true;
+                   // Debug.Log("da trung");
+                    break;
+
+                }
+                else
+                {
+                    right = false;
+                }
+                if (endot.x == allDot[i].end.x && endot.y == allDot[i].end.y)
+                {
+                    right = true;
+                  //  Debug.Log("da trung");
+                    break;
+                }
+                else
+                {
+                    right = false;
+                }
+            }
+        }
+        
+
+        return right;
     }
 }

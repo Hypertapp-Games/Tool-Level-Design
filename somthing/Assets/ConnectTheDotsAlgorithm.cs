@@ -89,11 +89,11 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     public void Astar(dots Start, dots End , int value)
     {
         var CurrentDot = Start;
-        List <value> Q = new List<value>();
-        List <value> dotExpanded = new List<value>();
+        List <value> Q = new List<value>(); // list các dot ?ang xét 
+        List <value> dotExpanded = new List<value>(); //list các dot ?ã xét
 
 
-        List<value> allDot = new List<value>();
+        List<value> allDot = new List<value>();//t?t c? các list ?ã và ?ang xét
 
         AstarLoop(Start, End, Q, CurrentDot, dotExpanded, allDot, value);
     }

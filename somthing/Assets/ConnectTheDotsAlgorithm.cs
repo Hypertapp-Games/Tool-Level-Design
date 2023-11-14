@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -89,11 +89,11 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     public void Astar(dots Start, dots End , int value)
     {
         var CurrentDot = Start;
-        List <value> Q = new List<value>(); // list các dot ?ang xét 
-        List <value> dotExpanded = new List<value>(); //list các dot ?ã xét
+        List <value> Q = new List<value>(); // list cÃ¡c dot Ä‘ang xÃ©t 
+        List <value> dotExpanded = new List<value>(); //list cÃ¡c dot Ä‘Ã£ xÃ©t
 
 
-        List<value> allDot = new List<value>();//t?t c? các list ?ã và ?ang xét
+        List<value> allDot = new List<value>();//táº¥t cáº£ cÃ¡c list Ä‘Ã£ vÃ  Ä‘ang xÃ©t
 
         AstarLoop(Start, End, Q, CurrentDot, dotExpanded, allDot, value);
     }
@@ -136,6 +136,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             AstarLoop(Start, End, Q, CurrentDot, dotExpanded,allDot,value);
         }
     }
+    // duy lai duong di ngan nhat
     public void EndAstarLoop(dots Start,dots dot ,List<value> dotExpanded, List<dots> Result , int value)
     {
         for (int i = 0; i < dotExpanded.Count; i++)
@@ -156,6 +157,8 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             }
         }
     }
+
+    // sau khi da xet xong het thi thay doi gia tri tren matrix 
     public void ChangNumberListValue(List<dots> Result,int value)
     {
         for(int i = 0; i < 5; i++)

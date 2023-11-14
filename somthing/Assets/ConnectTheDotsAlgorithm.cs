@@ -12,7 +12,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
 
         public dots(float x, float y)
         {
-            this.x = y;
+            this.x = x;
             this.y = y;
         }
     }
@@ -131,10 +131,10 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
         }
         else
         {
+            Debug.Log(CurrentDot.x + "   " + CurrentDot.y);
             CurrentDot = Q[index].end;
-            Debug.Log(Q[index].start.x + "   "+ Q[index].start.y) ;
             Q.Remove(Q[index]);
-           // AstarLoop(Start, End, Q, CurrentDot, dotExpanded,allDot,value);
+            AstarLoop(Start, End, Q, CurrentDot, dotExpanded,allDot,value);
         }
         Debug.Log(Q.Count);
     }

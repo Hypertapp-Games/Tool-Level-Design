@@ -89,11 +89,11 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     public void Astar(dots Start, dots End , int value)
     {
         var CurrentDot = Start;
-        List <value> Q = new List<value>(); // list các dot đang xét 
-        List <value> dotExpanded = new List<value>(); //list các dot đã xét
+        List <value> Q = new List<value>(); // list cac dot dang xet 
+        List <value> dotExpanded = new List<value>(); //list cac dot da xet
 
 
-        List<value> allDot = new List<value>();//tất cả các list đã và đang xét
+        List<value> allDot = new List<value>();// tat ca cac dot da va dang xet
 
         AstarLoop(Start, End, Q, CurrentDot, dotExpanded, allDot, value);
     }
@@ -127,14 +127,16 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
 
             var dot = dotExpanded[dotExpanded.Count - 1].start;
             EndAstarLoop(Start,dot, dotExpanded, Result,value);
-            //Do something here
+        
         }
         else
         {
             CurrentDot = Q[index].end;
+            Debug.Log(Q[index].start.x + "   "+ Q[index].start.y) ;
             Q.Remove(Q[index]);
-            AstarLoop(Start, End, Q, CurrentDot, dotExpanded,allDot,value);
+           // AstarLoop(Start, End, Q, CurrentDot, dotExpanded,allDot,value);
         }
+        Debug.Log(Q.Count);
     }
     // duy lai duong di ngan nhat
     public void EndAstarLoop(dots Start,dots dot ,List<value> dotExpanded, List<dots> Result , int value)

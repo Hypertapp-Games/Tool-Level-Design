@@ -219,7 +219,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
 
         AstarLoop(Start, End, Q, CurrentDot, dotExpanded, allDot, value,CountLoop);
     }
-  
+    // Thuc hien A* loop
     public void AstarLoop(dots Start, dots End, List<value> Q, dots CurrentDot, List<value> dotExpanded, List<value> allDot, int value, int CountLoop)
     {
         CountLoop++;
@@ -262,7 +262,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             {
                 CurrentDot = Q[index].end;
                 Q.Remove(Q[index]);
-                if (CountLoop < 100*100) // gioi han so lan loop, neu nhieu qua 5*5 =125 tuc la da loi
+                if (CountLoop < 10*10) // gioi han so lan loop, neu nhieu qua 5*5 =125 tuc la da loi
                 {
                     AstarLoop(Start, End, Q, CurrentDot, dotExpanded,allDot,value,CountLoop);
                
@@ -316,7 +316,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
         }
     }
 
-    // kiem tra cac doiot lien ke
+    // kiem tra cac dot lien ke dot dang xet
     public void ConsiderAdjacentDot(int x, int y , dots Start, List<value> Q, dots CurrentDot, List<value> allDot, int value)
     {
         

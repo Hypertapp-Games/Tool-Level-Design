@@ -243,39 +243,11 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     }
    
     // List<int> stt = new List<int>{ 1, 7, 8, 3, 4, 2, 5, 6 };
-    // 8,1,7,4,2,3,6,5 
-    public void BBacktracking(float k)
-    {
-        var h = (int)k;
-        for (int i = 0; i < h; i++)
-        {
-            var dotStart = new dots(temp[i].start.x, temp[i].start.y);
-            var dotEnd = new dots(temp[i].end.x, temp[i].end.y);
-            Astar(dotStart, dotEnd, temp[i].value, number);
-            if (!currentDotRight)
-            {
-                
-                break;
-            }
-            
-        }
-
-        if (currentDotRight)
-        {
-            k++;
-            number = _tempNumber;
-            BBacktracking(k);
-        }
-        else
-        {
-            number = _tempNumber;
-        }
-        
-    }
+    // 8,1,7,4,2,3,6,5
     public void Backtracking( int CurrentStep)
     {
         CurrentStep++;
-        if (CurrentStep < 10)
+        if (CurrentStep < 100)
         {
             for (int i = 0; i < temp.Count; i++)
             {
@@ -293,6 +265,10 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
                 }
             }
         }
+        else
+        {
+            Debug.Log("Khong co loi giai");
+        }
         
     }
 
@@ -300,7 +276,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     public void CheckInAStep( int step, int a,  int CurrentStep, int b)
     {
         b++;
-        if (b < 10)
+        if (b < 100)
         {
             sumFale = true;
             ClearNumberMatrix();
@@ -342,6 +318,10 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
                 ClearNumberMatrix();
                 Backtracking(CurrentStep);
             }
+        }
+        else
+        {
+            Debug.Log("Khong co loi giai");
         }
         
     }

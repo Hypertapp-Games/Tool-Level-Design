@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class ConnectTheDotsAlgorithm : MonoBehaviour
@@ -70,40 +71,71 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
 
     void Start()
     {
-        number = new int[5, 5]
+        number = new int[10, 10]
       {
-            { 1, 0, 0, 0, 0 },
-            { 5, 0, 0, 5, 0 },
-            { 0, 0, 0, 3, 0 },
-            { 0, 3, 2, 0, 0 },
-            { 2, 0, 0, 0, 1 }
+            { 0 , 0, 2, 0, 0, 0, 0, 0 , -1, -1 },
+            { 0 , 0, 3, 6, 5, 0, 0, 0 , -1, -1 },
+            { 0 , 0, 4, 0, 0, 0, 0, 0 , -1, -1 },
+            { 0 , 0, 0, 0, 0, 4, 0, 6 , -1, -1},
+            { 0 , 0, 0, 2, 0, 3, 0, 0 , -1, -1 },
+            { 5 , 0, 7, 0, 0, 7, 8, 0 , -1, -1 },
+            { 1 , 0, 0, 0, 8, 0, 0, 0 , -1, -1 },
+            { 0 , 0, 1, 0, 0, 0, 0, 0 , -1, -1 },
+            { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
+            { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
       };
         CheckAllDotInMatrix();
+        
     }
+
+    public GameObject cloneSquare;
+    public List<Color> Colors;
+    public Transform parent;
     public void DeBugNumberAray()
     {
-        Debug.Log("       " + number[0, 0] + "       " + number[0, 1] + "       " + number[0, 2] + "       " + number[0, 3] + "       " + number[0, 4]);
-        Debug.Log("       " + number[1, 0] + "       " + number[1, 1] + "       " + number[1, 2] + "       " + number[1, 3] + "       " + number[1, 4]);
-        Debug.Log("       " + number[2, 0] + "       " + number[2, 1] + "       " + number[2, 2] + "       " + number[2, 3] + "       " + number[2, 4]);
-        Debug.Log("       " + number[3, 0] + "       " + number[3, 1] + "       " + number[3, 2] + "       " + number[3, 3] + "       " + number[3, 4]);
-        Debug.Log("       " + number[4, 0] + "       " + number[4, 1] + "       " + number[4, 2] + "       " + number[4, 3] + "       " + number[4, 4]);
+        // Debug.Log("       " + number[0, 0] + "       " + number[0, 1] + "       " + number[0, 2] + "       " + number[0, 3] + "       " + number[0, 4]);
+        // Debug.Log("       " + number[1, 0] + "       " + number[1, 1] + "       " + number[1, 2] + "       " + number[1, 3] + "       " + number[1, 4]);
+        // Debug.Log("       " + number[2, 0] + "       " + number[2, 1] + "       " + number[2, 2] + "       " + number[2, 3] + "       " + number[2, 4]);
+        // Debug.Log("       " + number[3, 0] + "       " + number[3, 1] + "       " + number[3, 2] + "       " + number[3, 3] + "       " + number[3, 4]);
+        // Debug.Log("       " + number[4, 0] + "       " + number[4, 1] + "       " + number[4, 2] + "       " + number[4, 3] + "       " + number[4, 4]);
+        Debug.Log("       " + number[0, 0] + "       " + number[0, 1] + "       " + number[0, 2] + "       " + number[0, 3] + "       " + number[0, 4]+ "       " + number[0, 5]+ "       " + number[0, 6]+ "       " + number[0, 7]+ "       " + number[0, 8]+ "       " + number[0, 9]);
+        Debug.Log("       " + number[1, 0] + "       " + number[1, 1] + "       " + number[1, 2] + "       " + number[1, 3] + "       " + number[1, 4]+ "       " + number[1, 5]+ "       " + number[1, 6]+ "       " + number[1, 7]+ "       " + number[1, 8]+ "       " + number[1, 9]);
+        Debug.Log("       " + number[2, 0] + "       " + number[2, 1] + "       " + number[2, 2] + "       " + number[2, 3] + "       " + number[2, 4]+ "       " + number[2, 5]+ "       " + number[2, 6]+ "       " + number[2, 7]+ "       " + number[2, 8]+ "       " + number[2, 9]);
+        Debug.Log("       " + number[3, 0] + "       " + number[3, 1] + "       " + number[3, 2] + "       " + number[3, 3] + "       " + number[3, 4]+ "       " + number[3, 5]+ "       " + number[3, 6]+ "       " + number[3, 7]+ "       " + number[3, 8]+ "       " + number[3, 9]);
+        Debug.Log("       " + number[4, 0] + "       " + number[4, 1] + "       " + number[4, 2] + "       " + number[4, 3] + "       " + number[4, 4]+ "       " + number[4, 5]+ "       " + number[4, 6]+ "       " + number[4, 7]+ "       " + number[4, 8]+ "       " + number[4, 9]);
+        Debug.Log("       " + number[5, 0] + "       " + number[5, 1] + "       " + number[5, 2] + "       " + number[5, 3] + "       " + number[5, 4]+ "       " + number[5, 5]+ "       " + number[5, 6]+ "       " + number[5, 7]+ "       " + number[5, 8]+ "       " + number[5, 9]);
+        Debug.Log("       " + number[6, 0] + "       " + number[6, 1] + "       " + number[6, 2] + "       " + number[6, 3] + "       " + number[6, 4]+ "       " + number[6, 5]+ "       " + number[6, 6]+ "       " + number[6, 7]+ "       " + number[6, 8]+ "       " + number[6, 9]);
+        Debug.Log("       " + number[7, 0] + "       " + number[7, 1] + "       " + number[7, 2] + "       " + number[7, 3] + "       " + number[7, 4]+ "       " + number[7, 5]+ "       " + number[7, 6]+ "       " + number[7, 7]+ "       " + number[7, 8]+ "       " + number[7, 9]);
+        Debug.Log("       " + number[8, 0] + "       " + number[8, 1] + "       " + number[8, 2] + "       " + number[8, 3] + "       " + number[8, 4]+ "       " + number[8, 5]+ "       " + number[8, 6]+ "       " + number[8, 7]+ "       " + number[8, 8]+ "       " + number[8, 9]);
+        Debug.Log("       " + number[9, 0] + "       " + number[9, 1] + "       " + number[9, 2] + "       " + number[9, 3] + "       " + number[9, 4]+ "       " + number[9, 5]+ "       " + number[9, 6]+ "       " + number[9, 7]+ "       " + number[9, 8]+ "       " + number[9, 9]);
+        for(int i = 0; i< 10; i++)
+        {
+            for (int j = 0; j < 10; j++)
+            {
+                var obj = Instantiate(cloneSquare, new Vector3( 9-i,  9-j, 0), quaternion.identity);
+                try
+                {
+                    obj.GetComponent<SpriteRenderer>().color = Colors[number[i, j]];
+                   
+                }
+                catch (Exception e)
+                {
+                }
+                obj.transform.SetParent(parent);
+            }
+        }
     }
-    // private void Update()
-    // {
-    //     if (Input.GetKeyDown(KeyCode.A))
-    //     {
-    //         DeBugNumberAray();
-    //     }
-    // }
 
-    public List<adot> allDotInMatrix = new List<adot>();
+
+
     
     //Kiem tra xem co bao nhieu dot tren ma tran
+    public List<adot> allDotInMatrix = new List<adot>();
     public void CheckAllDotInMatrix()
     {
-        for(int i = 0; i< 5; i++)
+        for(int i = 0; i< 10; i++)
         {
-            for (int j = 0; j < 5; j++)
+            for (int j = 0; j < 10; j++)
             {
                 if (number[i, j] != 0)
                 {
@@ -145,16 +177,35 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     // kiem tra nhung cap dot nao co khoang cach gan nhau nhat thi cho A* truoc, tang dan tu tap den cao
     public void StartAstarByDistance()
     {
+        List<coupledots> temp = new List<coupledots>();
         var enum1 = from  cpdot  in allCoupleDotInMatrix
-            orderby cpdot.distance
+            orderby cpdot.value
             select cpdot;
 
         foreach (var e in enum1)
         {
-            var dotStart = new dots(e.start.x, e.start.y);
-            var dotEnd = new dots(e.end.x, e.end.y);
-            Astar(dotStart, dotEnd, e.value);
+            temp.Add(e);
+            // var dotStart = new dots(e.start.x, e.start.y);
+            // var dotEnd = new dots(e.end.x, e.end.y);
+            // Astar(dotStart, dotEnd, e.value);
+            
+            
         }
+        List<int> stt = new List<int>{ 1, 7, 8, 3, 4, 2, 5, 6 };
+        for (int i = 0; i < stt.Count; i++)
+        {
+            for (int j = 0; j < temp.Count; j++)
+            {
+                if (temp[j].value == stt[i])
+                {
+                     var dotStart = new dots(temp[j].start.x, temp[j].start.y);
+                     var dotEnd = new dots(temp[j].end.x, temp[j].end.y);
+                     Astar(dotStart, dotEnd, temp[j].value);
+                     break;
+                }
+            }
+        }
+        
     }
 
     public void Astar(dots Start, dots End , int value)
@@ -211,7 +262,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             {
                 CurrentDot = Q[index].end;
                 Q.Remove(Q[index]);
-                if (CountLoop < 125) // gioi han so lan loop, neu nhieu qua 5*5 =125 tuc la da loi
+                if (CountLoop < 100*100) // gioi han so lan loop, neu nhieu qua 5*5 =125 tuc la da loi
                 {
                     AstarLoop(Start, End, Q, CurrentDot, dotExpanded,allDot,value,CountLoop);
                
@@ -250,9 +301,9 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     // sau khi da xet xong het thi thay doi gia tri tren matrix 
     public void ChangNumberListValue(List<dots> Result,int value)
     {
-        for(int i = 0; i < 5; i++)
+        for(int i = 0; i < 10; i++)
         {
-            for (int j = 0; j < 5; j++)
+            for (int j = 0; j < 10; j++)
             {
                 for (int k = 0; k < Result.Count; k++)
                 {
@@ -271,19 +322,23 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
         
         try
         {
-            if (number[(int)CurrentDot.x + x, (int)CurrentDot.y +y] == 0  || number[(int)CurrentDot.x + x, (int)CurrentDot.y +y]  == value)//&& (int)Start.x + x != CurrentDot.x && (int)Start.y + y != CurrentDot.y)
+            if (number[(int)CurrentDot.x + x, (int)CurrentDot.y + y] != -1)
             {
-                
-                
-                var endot = new dots(CurrentDot.x + x, CurrentDot.y + y);
-                if (!CheckDotInAllDot(endot, allDot))
+                if (number[(int)CurrentDot.x + x, (int)CurrentDot.y +y] == 0  || number[(int)CurrentDot.x + x, (int)CurrentDot.y +y]  == value)//&& (int)Start.x + x != CurrentDot.x && (int)Start.y + y != CurrentDot.y)
                 {
-                    var distance = Math.Abs(Start.x - endot.x) + Math.Abs(Start.y - endot.y) + Math.Sqrt(Math.Pow(Math.Abs(Start.x - endot.x), 2) + Math.Pow(Math.Abs(Start.y - endot.y), 2));
-                    var _value = new value(CurrentDot, endot, (float)distance);
-                    allDot.Add(_value);
-                    Q.Add(_value);
+                
+                
+                    var endot = new dots(CurrentDot.x + x, CurrentDot.y + y);
+                    if (!CheckDotInAllDot(endot, allDot))
+                    {
+                        var distance = Math.Abs(Start.x - endot.x) + Math.Abs(Start.y - endot.y) + Math.Sqrt(Math.Pow(Math.Abs(Start.x - endot.x), 2) + Math.Pow(Math.Abs(Start.y - endot.y), 2));
+                        var _value = new value(CurrentDot, endot, (float)distance);
+                        allDot.Add(_value);
+                        Q.Add(_value);
+                    }
                 }
             }
+            
         }
         catch
         {

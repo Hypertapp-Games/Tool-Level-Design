@@ -68,7 +68,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             distance = (float)Math.Sqrt(Math.Pow(Math.Abs(start.x - end.x), 2) + Math.Pow(Math.Abs(start.y - end.y), 2));
         } 
     }
-
+    [SerializeField] private int[,] _tempNumber;
     void Start()
     {
         number = new int[10, 10]
@@ -84,6 +84,20 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
             { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
       };
+        _tempNumber =   new int[10, 10]
+        {
+            { 0 , 0, 2, 0, 0, 0, 0, 0 , -1, -1 },
+            { 0 , 0, 3, 6, 5, 0, 0, 0 , -1, -1 },
+            { 0 , 0, 4, 0, 0, 0, 0, 0 , -1, -1 },
+            { 0 , 0, 0, 0, 0, 4, 0, 6 , -1, -1},
+            { 0 , 0, 0, 2, 0, 3, 0, 0 , -1, -1 },
+            { 5 , 0, 7, 0, 0, 7, 8, 0 , -1, -1 },
+            { 1 , 0, 0, 0, 8, 0, 0, 0 , -1, -1 },
+            { 0 , 0, 1, 0, 0, 0, 0, 0 , -1, -1 },
+            { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
+            { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
+        };
+        
         CheckAllDotInMatrix();
         
     }
@@ -91,7 +105,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     public GameObject cloneSquare;
     public List<Color> Colors;
     public Transform parent;
-    public void DeBugNumberAray()
+    public void DeBugNumberAray(int [,] number)
     {
         // Debug.Log("       " + number[0, 0] + "       " + number[0, 1] + "       " + number[0, 2] + "       " + number[0, 3] + "       " + number[0, 4]);
         // Debug.Log("       " + number[1, 0] + "       " + number[1, 1] + "       " + number[1, 2] + "       " + number[1, 3] + "       " + number[1, 4]);
@@ -152,17 +166,25 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     public void CheckAllCoupleDotInMatrix()
     {
         int value = allDotInMatrix[0].value;
-        for(int i = 1; i< allDotInMatrix.Count; i++)
+        if (value != -1)
         {
-            if (allDotInMatrix[i].value == value)
+            for(int i = 1; i< allDotInMatrix.Count; i++)
             {
-                var newcoupledot = new coupledots(allDotInMatrix[0], allDotInMatrix[i], value);
-                allCoupleDotInMatrix.Add(newcoupledot);
-                allDotInMatrix.Remove(allDotInMatrix[i]);
-                allDotInMatrix.Remove(allDotInMatrix[0]);
-                break;
+                if (allDotInMatrix[i].value == value)
+                {
+                    var newcoupledot = new coupledots(allDotInMatrix[0], allDotInMatrix[i], value);
+                    allCoupleDotInMatrix.Add(newcoupledot);
+                    allDotInMatrix.Remove(allDotInMatrix[i]);
+                    allDotInMatrix.Remove(allDotInMatrix[0]);
+                    break;
+                }
             }
         }
+        else
+        {
+            allDotInMatrix.Remove(allDotInMatrix[0]);
+        }
+        
 
         if (allDotInMatrix.Count >= 2)
         {
@@ -171,44 +193,208 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
         else
         {
             StartAstarByDistance();
-            DeBugNumberAray();//log maxtrix sau khi giai ra man hin de kiem tra
+            DeBugNumberAray(number);//log maxtrix sau khi giai ra man hin de kiem tra
         }
     }
     // kiem tra nhung cap dot nao co khoang cach gan nhau nhat thi cho A* truoc, tang dan tu tap den cao
+    public bool currentDotRight = true;
+    public  List<coupledots> temp = new List<coupledots>();
     public void StartAstarByDistance()
     {
-        List<coupledots> temp = new List<coupledots>();
         var enum1 = from  cpdot  in allCoupleDotInMatrix
-            orderby cpdot.value
+            orderby cpdot.distance
             select cpdot;
 
         foreach (var e in enum1)
         {
             temp.Add(e);
-            // var dotStart = new dots(e.start.x, e.start.y);
-            // var dotEnd = new dots(e.end.x, e.end.y);
-            // Astar(dotStart, dotEnd, e.value);
-            
+
+        }
+        // List<int> stt = new List<int>{ 8, 1, 7 , 3, 4, 2, 5, 6 };
+        // //8,1,7,4,2,3,6,5
+        // for (int i = 0; i < stt.Count; i++)
+        // {
+        //     for (int j = 0; j < temp.Count; j++)
+        //     {
+        //         if (temp[j].value == stt[i])
+        //         {
+        //              var dotStart = new dots(temp[j].start.x, temp[j].start.y);
+        //              var dotEnd = new dots(temp[j].end.x, temp[j].end.y);
+        //              Astar(dotStart, dotEnd, temp[j].value,number);
+        //              break;
+        //         }
+        //     }
+        // }
+
+        var CurrentStep = 0;
+        Backtracking(CurrentStep);
+
+    }
+   
+    // List<int> stt = new List<int>{ 1, 7, 8, 3, 4, 2, 5, 6 };
+    // 8,1,7,4,2,3,6,5 
+    public void BBacktracking(float k)
+    {
+        var h = (int)k;
+        for (int i = 0; i < h; i++)
+        {
+            var dotStart = new dots(temp[i].start.x, temp[i].start.y);
+            var dotEnd = new dots(temp[i].end.x, temp[i].end.y);
+            Astar(dotStart, dotEnd, temp[i].value, number);
+            if (!currentDotRight)
+            {
+                
+                break;
+            }
             
         }
-        List<int> stt = new List<int>{ 1, 7, 8, 3, 4, 2, 5, 6 };
-        for (int i = 0; i < stt.Count; i++)
+
+        if (currentDotRight)
         {
-            for (int j = 0; j < temp.Count; j++)
+            k++;
+            number = _tempNumber;
+            BBacktracking(k);
+        }
+        else
+        {
+            number = _tempNumber;
+        }
+        
+    }
+    public void Backtracking( int CurrentStep)
+    {
+        CurrentStep++;
+        if (CurrentStep < 10)
+        {
+            for (int i = 0; i < temp.Count; i++)
             {
-                if (temp[j].value == stt[i])
+                var dotStart = new dots(temp[i].start.x, temp[i].start.y);
+                var dotEnd = new dots(temp[i].end.x, temp[i].end.y);
+                Astar(dotStart, dotEnd, temp[i].value, number);
+                if (!currentDotRight)
                 {
-                     var dotStart = new dots(temp[j].start.x, temp[j].start.y);
-                     var dotEnd = new dots(temp[j].end.x, temp[j].end.y);
-                     Astar(dotStart, dotEnd, temp[j].value);
-                     break;
+                    Debug.Log("Sai va bat dau check tu day" + temp[i].value + i);
+                    int a = 0;
+                    var b = 0;
+                    CheckInAStep(i  ,a,  CurrentStep,b);
+                    
+                    break;
                 }
             }
         }
         
     }
 
-    public void Astar(dots Start, dots End , int value)
+    public bool sumFale = true;
+    public void CheckInAStep( int step, int a,  int CurrentStep, int b)
+    {
+        b++;
+        if (b < 10)
+        {
+            sumFale = true;
+            number =  new int[10, 10]
+            {
+                { 0 , 0, 2, 0, 0, 0, 0, 0 , -1, -1 },
+                { 0 , 0, 3, 6, 5, 0, 0, 0 , -1, -1 },
+                { 0 , 0, 4, 0, 0, 0, 0, 0 , -1, -1 },
+                { 0 , 0, 0, 0, 0, 4, 0, 6 , -1, -1},
+                { 0 , 0, 0, 2, 0, 3, 0, 0 , -1, -1 },
+                { 5 , 0, 7, 0, 0, 7, 8, 0 , -1, -1 },
+                { 1 , 0, 0, 0, 8, 0, 0, 0 , -1, -1 },
+                { 0 , 0, 1, 0, 0, 0, 0, 0 , -1, -1 },
+                { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
+                { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
+            };
+            for (int i = 0; i <= step; i++)
+            {
+                var dotStart = new dots(temp[i].start.x, temp[i].start.y);
+                var dotEnd = new dots(temp[i].end.x, temp[i].end.y);
+                Astar(dotStart, dotEnd, temp[i].value, number);
+                if (!currentDotRight)
+                {
+                    sumFale = false;
+                    DeBugNumberAray(number);
+                    Debug.Log(i);
+                }
+            }
+
+            if (!sumFale)
+            {
+                var arrayTemp = temp.ToArray();
+                var index = step - a;
+                try
+                {
+               
+                    var dot1 = temp[index];
+                    var dot2 = temp[index-1];
+                    arrayTemp[index-1] = dot1;
+                    arrayTemp[index] = dot2;
+                    a++;
+                }
+                catch (Exception e)
+                {
+                }
+                temp.Clear();
+                temp = arrayTemp.ToList();
+                CheckInAStep(step, a, CurrentStep,b);
+            }
+            else
+            {
+                Debug.Log("Da check xong va dung" );
+                number =  new int[10, 10]
+                {
+                    { 0 , 0, 2, 0, 0, 0, 0, 0 , -1, -1 },
+                    { 0 , 0, 3, 6, 5, 0, 0, 0 , -1, -1 },
+                    { 0 , 0, 4, 0, 0, 0, 0, 0 , -1, -1 },
+                    { 0 , 0, 0, 0, 0, 4, 0, 6 , -1, -1},
+                    { 0 , 0, 0, 2, 0, 3, 0, 0 , -1, -1 },
+                    { 5 , 0, 7, 0, 0, 7, 8, 0 , -1, -1 },
+                    { 1 , 0, 0, 0, 8, 0, 0, 0 , -1, -1 },
+                    { 0 , 0, 1, 0, 0, 0, 0, 0 , -1, -1 },
+                    { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
+                    { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
+                };
+                Backtracking(CurrentStep);
+            }
+        }
+        
+    }
+
+    public void CheckOb(int[,] tempNumber , int value, int index)
+    {
+        Debug.Log("Value loi dang duoc xet lai" + value);
+        //DeBugNumberAray(tempNumber);
+        var arrayTemp = temp.ToArray();
+        for (int i = 0; i < 10; i++)
+        {
+            for (int j = 0; j < 10; j++)
+            {
+                if (tempNumber[i, j] == value)
+                {
+                    if (number[i, j] != 0 && number[i, j] != -1 && number[i,j] != value)
+                    {
+                        for (int k = 0; k < arrayTemp.Length; k++)
+                        {
+                            if (arrayTemp[k].value == number[i, j]) ;
+                            var dot1 = temp[k];
+                            var dot2 = temp[index];
+                            Debug.Log(value + " " + arrayTemp[k].value );
+
+                            arrayTemp[k] = dot2;
+                            arrayTemp[index] = dot1;
+                            temp.Clear();
+                            temp = arrayTemp.ToList();
+                            break;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+   
+
+    public void Astar(dots Start, dots End , int value, int[,] number)
     {
         var CurrentDot = Start;
         int CountLoop = 0;
@@ -217,16 +403,16 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
 
         List<value> allDot = new List<value>();// tat ca cac dot da va dang xet
 
-        AstarLoop(Start, End, Q, CurrentDot, dotExpanded, allDot, value,CountLoop);
+        AstarLoop(Start, End, Q, CurrentDot, dotExpanded, allDot, value,CountLoop, number);
     }
     // Thuc hien A* loop
-    public void AstarLoop(dots Start, dots End, List<value> Q, dots CurrentDot, List<value> dotExpanded, List<value> allDot, int value, int CountLoop)
+    public void AstarLoop(dots Start, dots End, List<value> Q, dots CurrentDot, List<value> dotExpanded, List<value> allDot, int value, int CountLoop, int[,] number)
     {
         CountLoop++;
-        ConsiderAdjacentDot(1, 0, Start, Q, CurrentDot, allDot, value);
-        ConsiderAdjacentDot(-1, 0, Start, Q, CurrentDot, allDot,value);
-        ConsiderAdjacentDot(0, 1, Start, Q, CurrentDot, allDot,value);
-        ConsiderAdjacentDot(0, -1, Start, Q, CurrentDot, allDot,value);
+        ConsiderAdjacentDot(1 , 0 , Start, Q, CurrentDot, allDot, value , number);
+        ConsiderAdjacentDot(-1, 0 , Start, Q, CurrentDot, allDot, value, number);
+        ConsiderAdjacentDot(0 , 1 , Start, Q, CurrentDot, allDot, value, number);
+        ConsiderAdjacentDot(0 , -1, Start, Q, CurrentDot, allDot, value, number);
 
         float minDis = 10000;
         int index = 0;
@@ -255,8 +441,9 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
                 Result.Add(dotStart);
 
                 var dot = dotExpanded[dotExpanded.Count - 1].start;
-                EndAstarLoop(Start,dot, dotExpanded, Result,value);
-        
+                EndAstarLoop(Start,dot, dotExpanded, Result,value, number);
+                currentDotRight = true;
+
             }
             else
             {
@@ -264,7 +451,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
                 Q.Remove(Q[index]);
                 if (CountLoop < 10*10) // gioi han so lan loop, neu nhieu qua 5*5 =125 tuc la da loi
                 {
-                    AstarLoop(Start, End, Q, CurrentDot, dotExpanded,allDot,value,CountLoop);
+                    AstarLoop(Start, End, Q, CurrentDot, dotExpanded,allDot,value,CountLoop,number);
                
                 }
             }
@@ -272,12 +459,13 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
         catch (Exception e)
         {
             Debug.Log("Loi giai sai");
+            currentDotRight = false;
         }
       
       
     }
     // duyet lai duong di ngan nhat
-    public void EndAstarLoop(dots Start,dots dot ,List<value> dotExpanded, List<dots> Result , int value)
+    public void EndAstarLoop(dots Start,dots dot ,List<value> dotExpanded, List<dots> Result , int value, int[,] number)
     {
         for (int i = 0; i < dotExpanded.Count; i++)
         {
@@ -287,11 +475,11 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
                 Result.Add(_dot);
                 if(dotExpanded[i].start.x == Start.x && dotExpanded[i].start.y == Start.y)
                 {
-                    ChangNumberListValue(Result, value);
+                    ChangNumberListValue(Result, value, number);
                 }
                 else
                 {
-                    EndAstarLoop(Start, _dot, dotExpanded, Result,value);
+                    EndAstarLoop(Start, _dot, dotExpanded, Result,value,number);
                 }
                    
             }
@@ -299,7 +487,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     }
 
     // sau khi da xet xong het thi thay doi gia tri tren matrix 
-    public void ChangNumberListValue(List<dots> Result,int value)
+    public void ChangNumberListValue(List<dots> Result,int value, int[,] number)
     {
         for(int i = 0; i < 10; i++)
         {
@@ -317,7 +505,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     }
 
     // kiem tra cac dot lien ke dot dang xet
-    public void ConsiderAdjacentDot(int x, int y , dots Start, List<value> Q, dots CurrentDot, List<value> allDot, int value)
+    public void ConsiderAdjacentDot(int x, int y , dots Start, List<value> Q, dots CurrentDot, List<value> allDot, int value,int[,] number)
     {
         
         try

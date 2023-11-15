@@ -76,7 +76,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             { 0 , 0, 2, 0, 0, 0, 0, 0 , -1, -1 },
             { 0 , 0, 3, 6, 5, 0, 0, 0 , -1, -1 },
             { 0 , 0, 4, 0, 0, 0, 0, 0 , -1, -1 },
-            { 0 , 0, 0, 0, 0, 4, 0, 6 , -1, -1},
+            { 0 , 0, 0, 0, 0, 4, 0, 6 , -1, -1 },
             { 0 , 0, 0, 2, 0, 3, 0, 0 , -1, -1 },
             { 5 , 0, 7, 0, 0, 7, 8, 0 , -1, -1 },
             { 1 , 0, 0, 0, 8, 0, 0, 0 , -1, -1 },
@@ -89,7 +89,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             { 0 , 0, 2, 0, 0, 0, 0, 0 , -1, -1 },
             { 0 , 0, 3, 6, 5, 0, 0, 0 , -1, -1 },
             { 0 , 0, 4, 0, 0, 0, 0, 0 , -1, -1 },
-            { 0 , 0, 0, 0, 0, 4, 0, 6 , -1, -1},
+            { 0 , 0, 0, 0, 0, 4, 0, 6 , -1, -1 },
             { 0 , 0, 0, 2, 0, 3, 0, 0 , -1, -1 },
             { 5 , 0, 7, 0, 0, 7, 8, 0 , -1, -1 },
             { 1 , 0, 0, 0, 8, 0, 0, 0 , -1, -1 },
@@ -105,6 +105,17 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     public GameObject cloneSquare;
     public List<Color> Colors;
     public Transform parent;
+
+    public void ClearNumberMatrix()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            for (int j = 0; j < 10; j++)
+            {
+                number[i, j] = _tempNumber[i, j];
+            }
+        }
+    }
     public void DeBugNumberAray(int [,] number)
     {
         // Debug.Log("       " + number[0, 0] + "       " + number[0, 1] + "       " + number[0, 2] + "       " + number[0, 3] + "       " + number[0, 4]);
@@ -292,19 +303,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
         if (b < 10)
         {
             sumFale = true;
-            number =  new int[10, 10]
-            {
-                { 0 , 0, 2, 0, 0, 0, 0, 0 , -1, -1 },
-                { 0 , 0, 3, 6, 5, 0, 0, 0 , -1, -1 },
-                { 0 , 0, 4, 0, 0, 0, 0, 0 , -1, -1 },
-                { 0 , 0, 0, 0, 0, 4, 0, 6 , -1, -1},
-                { 0 , 0, 0, 2, 0, 3, 0, 0 , -1, -1 },
-                { 5 , 0, 7, 0, 0, 7, 8, 0 , -1, -1 },
-                { 1 , 0, 0, 0, 8, 0, 0, 0 , -1, -1 },
-                { 0 , 0, 1, 0, 0, 0, 0, 0 , -1, -1 },
-                { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
-                { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
-            };
+            ClearNumberMatrix();
             for (int i = 0; i <= step; i++)
             {
                 var dotStart = new dots(temp[i].start.x, temp[i].start.y);
@@ -313,7 +312,6 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
                 if (!currentDotRight)
                 {
                     sumFale = false;
-                    DeBugNumberAray(number);
                     Debug.Log(i);
                 }
             }
@@ -341,19 +339,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             else
             {
                 Debug.Log("Da check xong va dung" );
-                number =  new int[10, 10]
-                {
-                    { 0 , 0, 2, 0, 0, 0, 0, 0 , -1, -1 },
-                    { 0 , 0, 3, 6, 5, 0, 0, 0 , -1, -1 },
-                    { 0 , 0, 4, 0, 0, 0, 0, 0 , -1, -1 },
-                    { 0 , 0, 0, 0, 0, 4, 0, 6 , -1, -1},
-                    { 0 , 0, 0, 2, 0, 3, 0, 0 , -1, -1 },
-                    { 5 , 0, 7, 0, 0, 7, 8, 0 , -1, -1 },
-                    { 1 , 0, 0, 0, 8, 0, 0, 0 , -1, -1 },
-                    { 0 , 0, 1, 0, 0, 0, 0, 0 , -1, -1 },
-                    { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
-                    { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
-                };
+                ClearNumberMatrix();
                 Backtracking(CurrentStep);
             }
         }

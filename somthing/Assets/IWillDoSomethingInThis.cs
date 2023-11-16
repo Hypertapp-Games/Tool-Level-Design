@@ -273,6 +273,63 @@ public class IWillDoSomethingInThis : MonoBehaviour
     //     { 0 , 0, 0, 0, 0, 0, 0, 0 , 9, 0 },
     //     { 10, 0, 0, 0, 0, 0, 0, 10, 1, 0 },
     // };
+    
+    //duyệt từ nhỏ đến lơn theo khoảng cách
+    //nếu gặp 1 trường hợp không tìm được đường đi
+    //
+    // List<int> stt = new List<int>{ 1, 7, 8, 3, 4, 2, 5, 6 };
+    // 8,1,7,4,2,3,6,5
+    // for (int i = 0; i < stt.Count; i++)
+    // {
+    //     for (int j = 0; j < temp.Count; j++)
+    //     {
+    //         if (temp[j].value == stt[i])
+    //         {
+    //              var dotStart = new dots(temp[j].start.x, temp[j].start.y);
+    //              var dotEnd = new dots(temp[j].end.x, temp[j].end.y);
+    //              Astar(dotStart, dotEnd, temp[j].value);
+    //              break;
+    //         }
+    //     }
+    // }
+    // var dotStart = new dots(e.start.x, e.start.y);
+    // var dotEnd = new dots(e.end.x, e.end.y);
+    // Astar(dotStart, dotEnd, e.value);
+    // public void CheckOb(int[,] tempNumber , int value, int index)
+    // {
+    //     Debug.Log("Value loi dang duoc xet lai" + value);
+    //     //DeBugNumberAray(tempNumber);
+    //     var arrayTemp = temp.ToArray();
+    //     for (int i = 0; i < 10; i++)
+    //     {
+    //         for (int j = 0; j < 10; j++)
+    //         {
+    //             if (tempNumber[i, j] == value)
+    //             {
+    //                 if (number[i, j] != 0 && number[i, j] != -1 && number[i,j] != value)
+    //                 {
+    //                     for (int k = 0; k < arrayTemp.Length; k++)
+    //                     {
+    //                         if (arrayTemp[k].value == number[i, j]) ;
+    //                         var dot1 = temp[k];
+    //                         var dot2 = temp[index];
+    //                         Debug.Log(value + " " + arrayTemp[k].value );
+    //
+    //                         arrayTemp[k] = dot2;
+    //                         arrayTemp[index] = dot1;
+    //                         temp.Clear();
+    //                         temp = arrayTemp.ToList();
+    //                         break;
+    //                     }
+    //                     break;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
+
+
 
 
 }

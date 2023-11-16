@@ -77,16 +77,16 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     {
         number = new int[10, 10]
       {
-            { 0 , 0, 1, 0, 0, 0, -1, -1 , -1, -1 },
-            { 0 , 2, 0, 0, 4, 0, -1, -1 , -1, -1 },
-            { 1 , 0, 0, 0, 0, 0, -1, -1 , -1, -1 },
-            { 2 , 3, 4, 0, 3, 0, -1, -1 , -1, -1 },
-            { 0 , 0, 0, 0, 0, 0, -1, -1 , -1, -1 },
-            { 0 , 0, 0, 0, 0, 0, -1, -1 , -1, -1 },
-            { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
-            { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
-            { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
-            { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
+            { 0 , 0, 1, 0, 0, 0, -1, -1, -1, -1 },
+            { 0 , 2, 0, 0, 4, 0, -1, -1, -1, -1 },
+            { 1 , 0, 0, 0, 0, 0, -1, -1, -1, -1 },
+            { 2 , 3, 4, 0, 3, 0, -1, -1, -1, -1 },
+            { 0 , 0, 0, 0, 0, 0, -1, -1, -1, -1 },
+            { 0 , 0, 0, 0, 0, 0, -1, -1, -1, -1 },
+            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
       };
         _tempNumber = new int[10, 10];
         
@@ -95,11 +95,6 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
         CheckAllDotInMatrix();
         
     }
-   
-    
-
-
-
     
     //Kiem tra xem co bao nhieu dot tren ma tran
     public List<adot> allDotInMatrix = new List<adot>();
@@ -265,7 +260,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
         var CurrentDot = Start;
         int CountLoop = 0;
         List <value> Q = new List<value>(); // list cac dot dang xet 
-        List <value> dotExpanded = new List<value>(); //list cac dot da xet
+        List <value> dotExpanded = new List<value>(); //list cac dot da xet 
 
         List<value> allDot = new List<value>();// tat ca cac dot da va dang xet
 
@@ -347,7 +342,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
                 {
                     EndAstarLoop(Start, _dot, dotExpanded, Result,value,number);
                 }
-                   
+                
             }
         }
     }

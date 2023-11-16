@@ -75,14 +75,17 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     public Transform parent;
     void Start()
     {
+        // 0 la cac vung trong va co the di chuyen duoc
+        // -1 la cac vung trong va khong the di chuyen duoc
+        // cac so khac tuong truong cho cac dot
         number = new int[10, 10]
       {
-            { 0 , 0, 1, 0, 0, 0, -1, -1, -1, -1 },
-            { 0 , 2, 0, 0, 4, 0, -1, -1, -1, -1 },
-            { 1 , 0, 0, 0, 0, 0, -1, -1, -1, -1 },
-            { 2 , 3, 4, 0, 3, 0, -1, -1, -1, -1 },
-            { 0 , 0, 0, 0, 0, 0, -1, -1, -1, -1 },
-            { 0 , 0, 0, 0, 0, 0, -1, -1, -1, -1 },
+            { 0, 0, 1, 0, 0, 0, -1, -1, -1, -1 },
+            { 0, 2, 0, 0, 4, 0, -1, -1, -1, -1 },
+            { 1, 0, 0, 0, 0, 0, -1, -1, -1, -1 },
+            { 2, 3, 4, 0, 3, 0, -1, -1, -1, -1 },
+            { 0, 0, 0, 0, 0, 0, -1, -1, -1, -1 },
+            { 0, 0, 0, 0, 0, 0, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
@@ -97,6 +100,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     }
     
     //Kiem tra xem co bao nhieu dot tren ma tran
+    // 
     public List<adot> allDotInMatrix = new List<adot>();
     public void CheckAllDotInMatrix()
     {

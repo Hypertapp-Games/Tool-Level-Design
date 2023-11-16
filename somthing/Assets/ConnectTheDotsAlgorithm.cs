@@ -149,9 +149,10 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             DeBugNumberAray(number);//log maxtrix sau khi giai ra man hin de kiem tra
         }
     }
-    // kiem tra nhung cap dot nao co khoang cach gan nhau nhat thi cho A* truoc, tang dan tu tap den cao
     public bool currentDotRight = true;
     public  List<coupledots> temp = new List<coupledots>();
+
+    // kiem tra nhung cap dot nao co khoang cach gan nhau nhat thi cho A* truoc, tang dan tu tap den cao
     public void StartAstarByDistance()
     {
         var enum1 = from  cpdot  in allCoupleDotInMatrix
@@ -375,8 +376,6 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             {
                 if (number[(int)CurrentDot.x + x, (int)CurrentDot.y +y] == 0  || number[(int)CurrentDot.x + x, (int)CurrentDot.y +y]  == value)//&& (int)Start.x + x != CurrentDot.x && (int)Start.y + y != CurrentDot.y)
                 {
-                
-                
                     var endot = new dots(CurrentDot.x + x, CurrentDot.y + y);
                     if (!CheckDotInAllDot(endot, allDot))
                     {

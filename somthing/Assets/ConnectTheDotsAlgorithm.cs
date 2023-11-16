@@ -34,7 +34,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
         } 
     }
  
-    [SerializeField] private int[,] number;
+    
     
     [Serializable]
     public struct  adot
@@ -68,88 +68,35 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             distance = (float)Math.Sqrt(Math.Pow(Math.Abs(start.x - end.x), 2) + Math.Pow(Math.Abs(start.y - end.y), 2));
         } 
     }
+    [SerializeField] private int[,] number;
     [SerializeField] private int[,] _tempNumber;
+    public GameObject cloneSquare;
+    public List<Color> Colors;
+    public Transform parent;
     void Start()
     {
         number = new int[10, 10]
       {
-            { 0 , 0, 2, 0, 0, 0, 0, 0 , -1, -1 },
-            { 0 , 0, 3, 6, 5, 0, 0, 0 , -1, -1 },
-            { 0 , 0, 4, 0, 0, 0, 0, 0 , -1, -1 },
-            { 0 , 0, 0, 0, 0, 4, 0, 6 , -1, -1 },
-            { 0 , 0, 0, 2, 0, 3, 0, 0 , -1, -1 },
-            { 5 , 0, 7, 0, 0, 7, 8, 0 , -1, -1 },
-            { 1 , 0, 0, 0, 8, 0, 0, 0 , -1, -1 },
-            { 0 , 0, 1, 0, 0, 0, 0, 0 , -1, -1 },
+            { 0 , 0, 1, 0, 0, 0, -1, -1 , -1, -1 },
+            { 0 , 2, 0, 0, 4, 0, -1, -1 , -1, -1 },
+            { 1 , 0, 0, 0, 0, 0, -1, -1 , -1, -1 },
+            { 2 , 3, 4, 0, 3, 0, -1, -1 , -1, -1 },
+            { 0 , 0, 0, 0, 0, 0, -1, -1 , -1, -1 },
+            { 0 , 0, 0, 0, 0, 0, -1, -1 , -1, -1 },
+            { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
+            { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
             { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
             { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
       };
-        _tempNumber =   new int[10, 10]
-        {
-            { 0 , 0, 2, 0, 0, 0, 0, 0 , -1, -1 },
-            { 0 , 0, 3, 6, 5, 0, 0, 0 , -1, -1 },
-            { 0 , 0, 4, 0, 0, 0, 0, 0 , -1, -1 },
-            { 0 , 0, 0, 0, 0, 4, 0, 6 , -1, -1 },
-            { 0 , 0, 0, 2, 0, 3, 0, 0 , -1, -1 },
-            { 5 , 0, 7, 0, 0, 7, 8, 0 , -1, -1 },
-            { 1 , 0, 0, 0, 8, 0, 0, 0 , -1, -1 },
-            { 0 , 0, 1, 0, 0, 0, 0, 0 , -1, -1 },
-            { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
-            { -1 , -1, -1, -1, -1, -1, -1, -1 , -1, -1 },
-        };
+        _tempNumber = new int[10, 10];
+        
+        CreateCloneNumberMatrix();
         
         CheckAllDotInMatrix();
         
     }
-
-    public GameObject cloneSquare;
-    public List<Color> Colors;
-    public Transform parent;
-
-    public void ClearNumberMatrix()
-    {
-        for (int i = 0; i < 10; i++)
-        {
-            for (int j = 0; j < 10; j++)
-            {
-                number[i, j] = _tempNumber[i, j];
-            }
-        }
-    }
-    public void DeBugNumberAray(int [,] number)
-    {
-        // Debug.Log("       " + number[0, 0] + "       " + number[0, 1] + "       " + number[0, 2] + "       " + number[0, 3] + "       " + number[0, 4]);
-        // Debug.Log("       " + number[1, 0] + "       " + number[1, 1] + "       " + number[1, 2] + "       " + number[1, 3] + "       " + number[1, 4]);
-        // Debug.Log("       " + number[2, 0] + "       " + number[2, 1] + "       " + number[2, 2] + "       " + number[2, 3] + "       " + number[2, 4]);
-        // Debug.Log("       " + number[3, 0] + "       " + number[3, 1] + "       " + number[3, 2] + "       " + number[3, 3] + "       " + number[3, 4]);
-        // Debug.Log("       " + number[4, 0] + "       " + number[4, 1] + "       " + number[4, 2] + "       " + number[4, 3] + "       " + number[4, 4]);
-        Debug.Log("       " + number[0, 0] + "       " + number[0, 1] + "       " + number[0, 2] + "       " + number[0, 3] + "       " + number[0, 4]+ "       " + number[0, 5]+ "       " + number[0, 6]+ "       " + number[0, 7]+ "       " + number[0, 8]+ "       " + number[0, 9]);
-        Debug.Log("       " + number[1, 0] + "       " + number[1, 1] + "       " + number[1, 2] + "       " + number[1, 3] + "       " + number[1, 4]+ "       " + number[1, 5]+ "       " + number[1, 6]+ "       " + number[1, 7]+ "       " + number[1, 8]+ "       " + number[1, 9]);
-        Debug.Log("       " + number[2, 0] + "       " + number[2, 1] + "       " + number[2, 2] + "       " + number[2, 3] + "       " + number[2, 4]+ "       " + number[2, 5]+ "       " + number[2, 6]+ "       " + number[2, 7]+ "       " + number[2, 8]+ "       " + number[2, 9]);
-        Debug.Log("       " + number[3, 0] + "       " + number[3, 1] + "       " + number[3, 2] + "       " + number[3, 3] + "       " + number[3, 4]+ "       " + number[3, 5]+ "       " + number[3, 6]+ "       " + number[3, 7]+ "       " + number[3, 8]+ "       " + number[3, 9]);
-        Debug.Log("       " + number[4, 0] + "       " + number[4, 1] + "       " + number[4, 2] + "       " + number[4, 3] + "       " + number[4, 4]+ "       " + number[4, 5]+ "       " + number[4, 6]+ "       " + number[4, 7]+ "       " + number[4, 8]+ "       " + number[4, 9]);
-        Debug.Log("       " + number[5, 0] + "       " + number[5, 1] + "       " + number[5, 2] + "       " + number[5, 3] + "       " + number[5, 4]+ "       " + number[5, 5]+ "       " + number[5, 6]+ "       " + number[5, 7]+ "       " + number[5, 8]+ "       " + number[5, 9]);
-        Debug.Log("       " + number[6, 0] + "       " + number[6, 1] + "       " + number[6, 2] + "       " + number[6, 3] + "       " + number[6, 4]+ "       " + number[6, 5]+ "       " + number[6, 6]+ "       " + number[6, 7]+ "       " + number[6, 8]+ "       " + number[6, 9]);
-        Debug.Log("       " + number[7, 0] + "       " + number[7, 1] + "       " + number[7, 2] + "       " + number[7, 3] + "       " + number[7, 4]+ "       " + number[7, 5]+ "       " + number[7, 6]+ "       " + number[7, 7]+ "       " + number[7, 8]+ "       " + number[7, 9]);
-        Debug.Log("       " + number[8, 0] + "       " + number[8, 1] + "       " + number[8, 2] + "       " + number[8, 3] + "       " + number[8, 4]+ "       " + number[8, 5]+ "       " + number[8, 6]+ "       " + number[8, 7]+ "       " + number[8, 8]+ "       " + number[8, 9]);
-        Debug.Log("       " + number[9, 0] + "       " + number[9, 1] + "       " + number[9, 2] + "       " + number[9, 3] + "       " + number[9, 4]+ "       " + number[9, 5]+ "       " + number[9, 6]+ "       " + number[9, 7]+ "       " + number[9, 8]+ "       " + number[9, 9]);
-        for(int i = 0; i< 10; i++)
-        {
-            for (int j = 0; j < 10; j++)
-            {
-                var obj = Instantiate(cloneSquare, new Vector3( 9-i,  9-j, 0), quaternion.identity);
-                try
-                {
-                    obj.GetComponent<SpriteRenderer>().color = Colors[number[i, j]];
-                   
-                }
-                catch (Exception e)
-                {
-                }
-                obj.transform.SetParent(parent);
-            }
-        }
-    }
+   
+    
 
 
 
@@ -221,29 +168,11 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             temp.Add(e);
 
         }
-        // List<int> stt = new List<int>{ 8, 1, 7 , 3, 4, 2, 5, 6 };
-        // //8,1,7,4,2,3,6,5
-        // for (int i = 0; i < stt.Count; i++)
-        // {
-        //     for (int j = 0; j < temp.Count; j++)
-        //     {
-        //         if (temp[j].value == stt[i])
-        //         {
-        //              var dotStart = new dots(temp[j].start.x, temp[j].start.y);
-        //              var dotEnd = new dots(temp[j].end.x, temp[j].end.y);
-        //              Astar(dotStart, dotEnd, temp[j].value,number);
-        //              break;
-        //         }
-        //     }
-        // }
-
         var CurrentStep = 0;
         Backtracking(CurrentStep);
 
     }
-   
-    // List<int> stt = new List<int>{ 1, 7, 8, 3, 4, 2, 5, 6 };
-    // 8,1,7,4,2,3,6,5
+    // Kiem tra trong qua trinh tim duong co dot nao khong tim duoc duong khong
     public void Backtracking( int CurrentStep)
     {
         CurrentStep++;
@@ -256,7 +185,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
                 Astar(dotStart, dotEnd, temp[i].value, number);
                 if (!currentDotRight)
                 {
-                    Debug.Log("Sai va bat dau check tu day" + temp[i].value + i);
+                    //Debug.Log("Sai va bat dau check tu day" + temp[i].value + i);
                     int a = 0;
                     var b = 0;
                     CheckInAStep(i  ,a,  CurrentStep,b);
@@ -272,13 +201,18 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
         
     }
 
-    public bool sumFale = true;
+    bool sumFalse = true;
+    // Neu dot khong tim duoc duong thi ta se cho no tang them 1 thu tu khi sap xep
+    // vi du như stt tim duong dang la  1, 7, 8, 3, 4, 2, 5, 6
+    // khi phat hien số 2 khong tim duoc duong ta se cho so 2 len truoc (so 2 luc nay dang o vi tri so 6)
+    // luc nay ta co 1, 7, 8, 3, 2, 4, 5, 6 
+    // lap lai cho den khi neu set den vi tri thu 6 thi dot nao cung co duong di
     public void CheckInAStep( int step, int a,  int CurrentStep, int b)
     {
         b++;
         if (b < 100)
         {
-            sumFale = true;
+            sumFalse = true;
             ClearNumberMatrix();
             for (int i = 0; i <= step; i++)
             {
@@ -287,12 +221,12 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
                 Astar(dotStart, dotEnd, temp[i].value, number);
                 if (!currentDotRight)
                 {
-                    sumFale = false;
+                    sumFalse = false;
                     Debug.Log(i);
                 }
             }
 
-            if (!sumFale)
+            if (!sumFalse)
             {
                 var arrayTemp = temp.ToArray();
                 var index = step - a;
@@ -314,8 +248,9 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
             }
             else
             {
-                Debug.Log("Da check xong va dung" );
+                //Debug.Log("Da check xong va dung" );
                 ClearNumberMatrix();
+                
                 Backtracking(CurrentStep);
             }
         }
@@ -325,41 +260,6 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
         }
         
     }
-
-    public void CheckOb(int[,] tempNumber , int value, int index)
-    {
-        Debug.Log("Value loi dang duoc xet lai" + value);
-        //DeBugNumberAray(tempNumber);
-        var arrayTemp = temp.ToArray();
-        for (int i = 0; i < 10; i++)
-        {
-            for (int j = 0; j < 10; j++)
-            {
-                if (tempNumber[i, j] == value)
-                {
-                    if (number[i, j] != 0 && number[i, j] != -1 && number[i,j] != value)
-                    {
-                        for (int k = 0; k < arrayTemp.Length; k++)
-                        {
-                            if (arrayTemp[k].value == number[i, j]) ;
-                            var dot1 = temp[k];
-                            var dot2 = temp[index];
-                            Debug.Log(value + " " + arrayTemp[k].value );
-
-                            arrayTemp[k] = dot2;
-                            arrayTemp[index] = dot1;
-                            temp.Clear();
-                            temp = arrayTemp.ToList();
-                            break;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    }
-   
-
     public void Astar(dots Start, dots End , int value, int[,] number)
     {
         var CurrentDot = Start;
@@ -538,5 +438,65 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
         
 
         return right;
+    }
+    // tao 1 ma tran clone ma tran goc de dung cho sau nay clear lai m tran goc
+    public void CreateCloneNumberMatrix()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            for (int j = 0; j < 10; j++)
+            {
+                _tempNumber[i, j] = number[i, j];
+            }
+        }
+    }    
+
+    public void ClearNumberMatrix()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            for (int j = 0; j < 10; j++)
+            {
+                number[i, j] = _tempNumber[i, j];
+            }
+        }
+    }
+    
+    // debug ma tran sau khi tim dc duong
+    public void DeBugNumberAray(int [,] number)
+    { 
+        // Debug.Log("       " + number[0, 0] + "       " + number[0, 1] + "       " + number[0, 2] + "       " + number[0, 3] + "       " + number[0, 4]);
+        // Debug.Log("       " + number[1, 0] + "       " + number[1, 1] + "       " + number[1, 2] + "       " + number[1, 3] + "       " + number[1, 4]);
+        // Debug.Log("       " + number[2, 0] + "       " + number[2, 1] + "       " + number[2, 2] + "       " + number[2, 3] + "       " + number[2, 4]);
+        // Debug.Log("       " + number[3, 0] + "       " + number[3, 1] + "       " + number[3, 2] + "       " + number[3, 3] + "       " + number[3, 4]);
+        // Debug.Log("       " + number[4, 0] + "       " + number[4, 1] + "       " + number[4, 2] + "       " + number[4, 3] + "       " + number[4, 4]);
+        Debug.Log("       " + number[0, 0] + "       " + number[0, 1] + "       " + number[0, 2] + "       " + number[0, 3] + "       " + number[0, 4]+ "       " + number[0, 5]+ "       " + number[0, 6]+ "       " + number[0, 7]+ "       " + number[0, 8]+ "       " + number[0, 9]);
+        Debug.Log("       " + number[1, 0] + "       " + number[1, 1] + "       " + number[1, 2] + "       " + number[1, 3] + "       " + number[1, 4]+ "       " + number[1, 5]+ "       " + number[1, 6]+ "       " + number[1, 7]+ "       " + number[1, 8]+ "       " + number[1, 9]);
+        Debug.Log("       " + number[2, 0] + "       " + number[2, 1] + "       " + number[2, 2] + "       " + number[2, 3] + "       " + number[2, 4]+ "       " + number[2, 5]+ "       " + number[2, 6]+ "       " + number[2, 7]+ "       " + number[2, 8]+ "       " + number[2, 9]);
+        Debug.Log("       " + number[3, 0] + "       " + number[3, 1] + "       " + number[3, 2] + "       " + number[3, 3] + "       " + number[3, 4]+ "       " + number[3, 5]+ "       " + number[3, 6]+ "       " + number[3, 7]+ "       " + number[3, 8]+ "       " + number[3, 9]);
+        Debug.Log("       " + number[4, 0] + "       " + number[4, 1] + "       " + number[4, 2] + "       " + number[4, 3] + "       " + number[4, 4]+ "       " + number[4, 5]+ "       " + number[4, 6]+ "       " + number[4, 7]+ "       " + number[4, 8]+ "       " + number[4, 9]);
+        Debug.Log("       " + number[5, 0] + "       " + number[5, 1] + "       " + number[5, 2] + "       " + number[5, 3] + "       " + number[5, 4]+ "       " + number[5, 5]+ "       " + number[5, 6]+ "       " + number[5, 7]+ "       " + number[5, 8]+ "       " + number[5, 9]);
+        Debug.Log("       " + number[6, 0] + "       " + number[6, 1] + "       " + number[6, 2] + "       " + number[6, 3] + "       " + number[6, 4]+ "       " + number[6, 5]+ "       " + number[6, 6]+ "       " + number[6, 7]+ "       " + number[6, 8]+ "       " + number[6, 9]);
+        Debug.Log("       " + number[7, 0] + "       " + number[7, 1] + "       " + number[7, 2] + "       " + number[7, 3] + "       " + number[7, 4]+ "       " + number[7, 5]+ "       " + number[7, 6]+ "       " + number[7, 7]+ "       " + number[7, 8]+ "       " + number[7, 9]);
+        Debug.Log("       " + number[8, 0] + "       " + number[8, 1] + "       " + number[8, 2] + "       " + number[8, 3] + "       " + number[8, 4]+ "       " + number[8, 5]+ "       " + number[8, 6]+ "       " + number[8, 7]+ "       " + number[8, 8]+ "       " + number[8, 9]);
+        Debug.Log("       " + number[9, 0] + "       " + number[9, 1] + "       " + number[9, 2] + "       " + number[9, 3] + "       " + number[9, 4]+ "       " + number[9, 5]+ "       " + number[9, 6]+ "       " + number[9, 7]+ "       " + number[9, 8]+ "       " + number[9, 9]);
+        
+        // ve len man hinh
+        for(int i = 0; i< 10; i++)
+        {
+            for (int j = 0; j < 10; j++)
+            {
+                var obj = Instantiate(cloneSquare, new Vector3( 9-i,  9-j, 0), quaternion.identity);
+                try
+                {
+                    obj.GetComponent<SpriteRenderer>().color = Colors[number[i, j]];
+                   
+                }
+                catch (Exception e)
+                {
+                }
+                obj.transform.SetParent(parent);
+            }
+        }
     }
 }

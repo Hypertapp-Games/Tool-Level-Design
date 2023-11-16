@@ -152,7 +152,7 @@ public class ConnectTheDotsAlgorithm : MonoBehaviour
     public bool currentDotRight = true;
     public  List<coupledots> temp = new List<coupledots>();
 
-    // kiem tra nhung cap dot nao co khoang cach gan nhau nhat thi cho A* truoc, tang dan tu tap den cao
+    // kiem tra nhung cap dot nao co khoang cach gan nhau nhat thi cho A* truoc, tang dan tu tap den cao 
     public void StartAstarByDistance()
     {
         var enum1 = from  cpdot  in allCoupleDotInMatrix

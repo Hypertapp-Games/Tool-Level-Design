@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
+using Random = UnityEngine.Random;
 
 public class SnakeFindWay : MonoBehaviour
 {
@@ -28,10 +30,12 @@ public class SnakeFindWay : MonoBehaviour
     public struct aSnake
     {
         public List<aTile> tiles;
+        public int value;
 
-        public aSnake(List<aTile> tiles)
+        public aSnake(List<aTile> tiles , int value)
         {
             this.tiles = new List<aTile>(tiles);
+            this.value = value;
         }
         public void SnakeMove(bool head, int x, int y)
         {
@@ -68,11 +72,11 @@ public class SnakeFindWay : MonoBehaviour
     {
         number = new int[10, 10]
         {
-            { 12,  13,  0 , 31, 32 ,   -1, -1, -1, -1, -1 },
-            { 11, -1 , -1 , -1, 33 ,   -1, -1, -1, -1, -1 },
-            { 0 , -1 , -1 , -1, 34 ,   -1, -1, -1, -1, -1 },
-            { 0 , -1 , -1 , -1, 43 ,   -1, -1, -1, -1, -1 },
-            { 21,  22,  23, 41, 42 ,   -1, -1, -1, -1, -1 },
+            { 0,  0,  0 , 0, 0 ,   -1, -1, -1, -1, -1 },
+            { 0, -1 , -1 , -1, 0 ,   -1, -1, -1, -1, -1 },
+            { 0 , -1 , -1 , -1, 0 ,   -1, -1, -1, -1, -1 },
+            { 0 , -1 , -1 , -1, 0 ,   -1, -1, -1, -1, -1 },
+            { 21,  22,  23, 0, 0 ,   -1, -1, -1, -1, -1 },
             
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
@@ -105,6 +109,7 @@ public class SnakeFindWay : MonoBehaviour
         for (int k = 0; k < allIdOfSnake.Count; k++)
         {
             List<aTile> tiles = new List<aTile>();
+            int value = 0;
             for (int i = 0; i < 10; i++)
             {
                 for (int j = 0; j < 10; j++)
@@ -115,6 +120,8 @@ public class SnakeFindWay : MonoBehaviour
                         if (snakeID == allIdOfSnake[k] )
                         {
                             tiles.Add(new aTile(i, j));
+                            number[i, j] = allIdOfSnake[k];
+                            value = allIdOfSnake[k];
                         }
                     }
                     catch (Exception e)
@@ -135,11 +142,90 @@ public class SnakeFindWay : MonoBehaviour
             }
             tiles.Clear();
             tiles = new List<aTile>(temp);
-            var aSnake = new aSnake(tiles);
+            var aSnake = new aSnake(tiles , value);
             Snakes.Add(aSnake);
         }
+
+        SnakeRandomDirectionMove();//TEST 1 SNAKE
     }
-    
+
+    public void SnakeRandomDirectionMove()
+    {
+        var snakeTest = Snakes[0];
+        CheckDirectionInAStep(snakeTest);
+
+    }
+
+    public void CheckDirectionInAStep(aSnake snakeTest)
+    {
+        List<int> stt = new List<int>();
+        if(CheckDirectionCanMove(1, 0, snakeTest.tiles[0].x, snakeTest.tiles[0].y, snakeTest.value))
+        {
+            stt.Add(1);
+        }
+
+        if (CheckDirectionCanMove(-1, 0, snakeTest.tiles[0].x, snakeTest.tiles[0].y, snakeTest.value))
+        {
+            stt.Add(2);
+        }
+
+        if (CheckDirectionCanMove(0, 1, snakeTest.tiles[0].x, snakeTest.tiles[0].y, snakeTest.value))
+        {
+            stt.Add(3);
+        }
+
+        if (CheckDirectionCanMove(0, -1, snakeTest.tiles[0].x, snakeTest.tiles[0].y, snakeTest.value))
+        {
+            stt.Add(4);
+        }
+
+        if (stt.Count > 0)
+        {
+            int a = Random.Range(0, stt.Count);
+            if(stt[a] == 1)
+            {
+                SnakeMove(1, 0, snakeTest);
+            }
+            else if(stt[a] == 2)
+            {
+                SnakeMove(-1, 0, snakeTest);
+            }
+            else if(stt[a] == 3)
+            {
+                SnakeMove(0, 1, snakeTest);
+            }
+            else if(stt[a] == 4)
+            {
+                SnakeMove(0, -1, snakeTest);
+            }
+            
+        }
+
+    }
+
+    public void SnakeMove(int x, int y, aSnake snakeTest)
+    {
+        var _x = snakeTest.tiles[0].x + x;
+        var _y = snakeTest.tiles[0].y + y;
+        try
+        {
+            if (number[_x, _y] != -1)
+            {
+                if (number[_x, _y] == 0 )
+                {
+                    snakeTest.SnakeMove(true,_x, _y);
+                }
+            }
+            else
+            {
+                Debug.Log("Da cham");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Da cham");
+        }
+    }
     // public void SetSnakeDate()
     // {
     //     for (int i = 0; i < lengthOfSnake.Count; i++)
@@ -162,24 +248,27 @@ public class SnakeFindWay : MonoBehaviour
     // {
     //     
     // }
-    // public void CheckDirectionCanMove(int x, int y, int currentX, int currentY, int value)
-    // {
-    //     var _x = currentX + x;
-    //     var _y = currentY + y;
-    //     try
-    //     {
-    //         if (number[_x, _y] != -1)
-    //         {
-    //             if (number[_x, _y] == 0  || number[_x, _y]  == value)
-    //             {
-    //                 
-    //             }
-    //         }
-    //         
-    //     }
-    //     catch
-    //     {
-    //
-    //     }
-    // }
+    public bool CheckDirectionCanMove(int x, int y, int currentX, int currentY, int value)
+    {
+        bool right = false;
+        var _x = currentX + x;
+        var _y = currentY + y;
+        try
+        {
+            if (number[_x, _y] != -1)
+            {
+                if (number[_x, _y] == 0 )
+                {
+                    right = true;
+                }
+            }
+            
+        }
+        catch
+        {
+            
+        }
+
+        return right;
+    }
 }

@@ -68,11 +68,11 @@ public class SnakeFindWay : MonoBehaviour
     {
         number = new int[10, 10]
         {
-            { 1 ,  1,  0,  3, 3 ,   -1, -1, -1, -1, -1 },
-            { 1 , -1, -1, -1, 3 ,   -1, -1, -1, -1, -1 },
-            { 0 , -1, -1, -1, 3 ,   -1, -1, -1, -1, -1 },
-            { 0 , -1, -1, -1, 4 ,   -1, -1, -1, -1, -1 },
-            { 2 ,  2,  2,  4, 4 ,   -1, -1, -1, -1, -1 },
+            { 12,  13,  0 , 31, 32 ,   -1, -1, -1, -1, -1 },
+            { 11, -1 , -1 , -1, 33 ,   -1, -1, -1, -1, -1 },
+            { 0 , -1 , -1 , -1, 34 ,   -1, -1, -1, -1, -1 },
+            { 0 , -1 , -1 , -1, 43 ,   -1, -1, -1, -1, -1 },
+            { 21,  22,  23, 41, 42 ,   -1, -1, -1, -1, -1 },
             
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
@@ -91,7 +91,7 @@ public class SnakeFindWay : MonoBehaviour
             {
                 if (number[i, j] != 0 && number[i, j] != -1)
                 {
-                    allIdOfSnake.Add(number[i, j]);
+                    allIdOfSnake.Add(Int32.Parse(number[i, j].ToString()[0].ToString()));
                 }
             }
         }
@@ -109,13 +109,32 @@ public class SnakeFindWay : MonoBehaviour
             {
                 for (int j = 0; j < 10; j++)
                 {
-                    if (number[i, j] == allIdOfSnake[k])
+                    try
                     {
-                        var aTile = new aTile(i, j);
-                        tiles.Add(aTile);
+                        var snakeID = Int32.Parse(number[i, j].ToString()[0].ToString());
+                        if (snakeID == allIdOfSnake[k] )
+                        {
+                            tiles.Add(new aTile(i, j));
+                        }
+                    }
+                    catch (Exception e)
+                    {
                     }
                 }
             }
+            List<aTile> temp = new List<aTile>();
+            var enum1 = from  _aTile  in tiles
+                orderby Int32.Parse(number[_aTile.x, _aTile.y].ToString()[1].ToString())
+                select _aTile;
+          
+            foreach (var e in enum1)
+            {
+                temp.Add(e);
+                Debug.Log("this do");
+
+            }
+            tiles.Clear();
+            tiles = new List<aTile>(temp);
             var aSnake = new aSnake(tiles);
             Snakes.Add(aSnake);
         }

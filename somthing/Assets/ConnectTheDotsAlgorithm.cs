@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Tham khao giai bang thuat toan quay lui https://www.101computing.net/connect-flow-backtracking-algorithm/#
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;

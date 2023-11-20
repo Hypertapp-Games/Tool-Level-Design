@@ -112,7 +112,6 @@ public class SnakeFindWay : MonoBehaviour
         }
         allIdOfSnake =  allIdOfSnake.Distinct().ToList();
         LoadSnakeByIDFromMatrix();
-
     }
     // Voi moi id. tim kiem trong ma tran cac tile cua 1 con ran voi id tuong ung
     public void LoadSnakeByIDFromMatrix()
@@ -245,28 +244,7 @@ public class SnakeFindWay : MonoBehaviour
         ChangeValueOfTheMatrixAfterSnakeMove(snakeTest);
 
     }
-    // public void SetSnakeDate()
-    // {
-    //     for (int i = 0; i < lengthOfSnake.Count; i++)
-    //     {
-    //         for (int j = 0; j < 10; j++)
-    //         {
-    //             for (int k = 0; k < 10; k++)
-    //             {
-    //                 if (number[j, k].ToString()[0].ToString() == (i+1).ToString())
-    //                 {
-    //                     number[j, k] = i + 1;
-    //                     CreateSnake(i+1);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    //
-    // public void CreateSnake(int SnakeID)
-    // {
-    //     
-    // }
+    
     public bool CheckDirectionCanMove(int x, int y, int currentX, int currentY, int value) // check cac huong co the di chuyen duoc
     {
         bool right = false;
@@ -336,4 +314,26 @@ public class SnakeFindWay : MonoBehaviour
             number[snakeTest.tiles[i].x, snakeTest.tiles[i].y] = snakeTest.value;
         }
     }
+    // public void SetSnakeDate()
+    // {
+    //     for (int i = 0; i < lengthOfSnake.Count; i++)
+    //     {
+    //         for (int j = 0; j < 10; j++)
+    //         {
+    //             for (int k = 0; k < 10; k++)
+    //             {
+    //                 if (number[j, k].ToString()[0].ToString() == (i+1).ToString())
+    //                 {
+    //                     number[j, k] = i + 1;
+    //                     CreateSnake(i+1);
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    //
+    // public void CreateSnake(int SnakeID)
+    // {
+    //     
+    // }
 }

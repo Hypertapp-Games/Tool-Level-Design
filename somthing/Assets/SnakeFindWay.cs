@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using Random = UnityEngine.Random;
@@ -71,10 +73,22 @@ public class SnakeFindWay : MonoBehaviour
             
         }
     }
+    public struct SnakeMoveDirection
+    {
+        public aSnake Snake;
+        public bool head;
+
+        public SnakeMoveDirection(aSnake Snake, bool head)
+        {
+            this.Snake = Snake;
+            this.head = head;
+        }
+    }
 
     public List<aSnake> Snakes = new List<aSnake>();
     [SerializeField] private int[,] number;
     public List<int> allIdOfSnake = new List<int>();
+    public ScreenCapture screenCapture;
     void Start()
     {
         // 0 la cac vung trong va co the di chuyen duoc
@@ -82,11 +96,11 @@ public class SnakeFindWay : MonoBehaviour
         // cac so khac tuong truong cho cac phan cua cac con ran
         number = new int[10, 10]
         {
-            { 0,  0,  0 , 0, 0 ,   -1, -1, -1, -1, -1 },
-            { 0, -1 , -1 , -1, 0 ,   -1, -1, -1, -1, -1 },
+            { 12,  13,  0 , 31, 32 ,   -1, -1, -1, -1, -1 },
+            { 11, -1 , -1 , -1, 33 ,   -1, -1, -1, -1, -1 },
             { 0 , -1 , -1 , -1, 0 ,   -1, -1, -1, -1, -1 },
-            { 0 , -1 , -1 , -1, 0 ,   -1, -1, -1, -1, -1 },
-            { 23,  22,  21, 0, 0 ,   -1, -1, -1, -1, -1 },
+            { 0 , -1 , -1 , -1, 43 ,   -1, -1, -1, -1, -1 },
+            { 21,  22,  23, 41, 42 ,   -1, -1, -1, -1, -1 },
             
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
@@ -95,6 +109,8 @@ public class SnakeFindWay : MonoBehaviour
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
         };
         LoadSnakeIDFromMatrix();
+        
+        SnakeRandomDirectionMove();//TEST 1 SNAKE
     }
         
     // Lay tat ca id cua cac con ran co trong ma tran
@@ -112,6 +128,7 @@ public class SnakeFindWay : MonoBehaviour
         }
         allIdOfSnake =  allIdOfSnake.Distinct().ToList();
         LoadSnakeByIDFromMatrix();
+        
     }
     // Voi moi id. tim kiem trong ma tran cac tile cua 1 con ran voi id tuong ung
     public void LoadSnakeByIDFromMatrix()
@@ -157,35 +174,122 @@ public class SnakeFindWay : MonoBehaviour
             Snakes.Add(aSnake);
         }
 
-        SnakeRandomDirectionMove();//TEST 1 SNAKE
+        GenerateTileByMatrix();
+        
     }
     // Check cac huong co the di chuyen duoc va chon 1 huong ngau nhien de di cho den khi khong con di duoc theo huong do nua
+    public int CurrentCheck = 0;
     public void SnakeRandomDirectionMove()
     {
-        var snakeTest = Snakes[0];
-        CheckDirectionInAStep(snakeTest);
+        CurrentCheck++;
+        if (CurrentCheck < 100)
+        {
+            //var snakeTest = Snakes[0];
+            List<SnakeMoveDirection> snakeMoveDirections = new List<SnakeMoveDirection>();
+            for (int i = 0; i < Snakes.Count; i++)
+            {
+                if (CheckSnakeCanMoveOrNot(Snakes[i], true))
+                {
+                    var snakeMoveDirection = new SnakeMoveDirection(Snakes[i], true);
+                    snakeMoveDirections.Add(snakeMoveDirection);
+                }
+                if (CheckSnakeCanMoveOrNot(Snakes[i], false))
+                {
+                    var snakeMoveDirection = new SnakeMoveDirection(Snakes[i], false);
+                    snakeMoveDirections.Add(snakeMoveDirection);
+                }
+            }
 
+            if (snakeMoveDirections.Count <= 0)
+            {
+                CurrentCheck = 20;
+                // khong tiep tuc check nua
+            }
+            else
+            {
+                var snakeMoveDirection = snakeMoveDirections[Random.Range(0, snakeMoveDirections.Count - 1)];
+                var snake = snakeMoveDirection.Snake;
+                var head = snakeMoveDirection.head;
+                CheckDirectionInAStep(snake, head);
+            }
+            //CheckDirectionInAStep(snakeTest);
+            
+        }
+        
     }
-    // Check cac huong co the di chuyen duoc
-    public void CheckDirectionInAStep(aSnake snakeTest)
+  
+    public bool CheckSnakeCanMoveOrNot(aSnake snake, bool head)
     {
+        var index = 0;
+        if (head)
+        {
+            index = 0;
+        }
+        else
+        {
+            index = snake.tiles.Count - 1;
+        }
         List<int> stt = new List<int>();
-        if(CheckDirectionCanMove(1, 0, snakeTest.tiles[0].x, snakeTest.tiles[0].y, snakeTest.value))
+        if(CheckDirectionCanMove(1, 0, snake.tiles[index].x, snake.tiles[index].y, snake.value))
         {
             stt.Add(1);
         }
 
-        if (CheckDirectionCanMove(-1, 0, snakeTest.tiles[0].x, snakeTest.tiles[0].y, snakeTest.value))
+        if (CheckDirectionCanMove(-1, 0, snake.tiles[index].x, snake.tiles[index].y, snake.value))
         {
             stt.Add(2);
         }
 
-        if (CheckDirectionCanMove(0, 1, snakeTest.tiles[0].x, snakeTest.tiles[0].y, snakeTest.value))
+        if (CheckDirectionCanMove(0, 1, snake.tiles[index].x, snake.tiles[index].y, snake.value))
         {
             stt.Add(3);
         }
 
-        if (CheckDirectionCanMove(0, -1, snakeTest.tiles[0].x, snakeTest.tiles[0].y, snakeTest.value))
+        if (CheckDirectionCanMove(0, -1, snake.tiles[index].x, snake.tiles[index].y, snake.value))
+        {
+            stt.Add(4);
+        }
+
+        bool right = true;
+        if (stt.Count > 0)
+        {
+            right = true;
+        }
+        else
+        {
+            right = false;
+        }
+        return right;
+    }
+    // Check cac huong co the di chuyen duoc
+    public void CheckDirectionInAStep(aSnake snake, bool head)
+    {
+        var index = 0;
+        if (head)
+        {
+            index = 0;
+        }
+        else
+        {
+            index = snake.tiles.Count - 1;
+        }
+        List<int> stt = new List<int>();
+        if(CheckDirectionCanMove(1, 0, snake.tiles[index].x, snake.tiles[index].y, snake.value))
+        {
+            stt.Add(1);
+        }
+
+        if (CheckDirectionCanMove(-1, 0, snake.tiles[index].x, snake.tiles[index].y, snake.value))
+        {
+            stt.Add(2);
+        }
+
+        if (CheckDirectionCanMove(0, 1, snake.tiles[index].x, snake.tiles[index].y, snake.value))
+        {
+            stt.Add(3);
+        }
+
+        if (CheckDirectionCanMove(0, -1, snake.tiles[index].x, snake.tiles[index].y, snake.value))
         {
             stt.Add(4);
         }
@@ -195,23 +299,23 @@ public class SnakeFindWay : MonoBehaviour
             int a = Random.Range(0, stt.Count);
             if(stt[a] == 1)
             {
-                SnakeMove(1, 0, snakeTest);
-                CheckDirectionInAStep(1, 0, snakeTest);
+                SnakeMove(1, 0, snake, index, head);
+                CheckDirectionInAStep(1, 0, snake, index, head);
             }
             else if(stt[a] == 2)
             {
-                SnakeMove(-1, 0, snakeTest);
-                CheckDirectionInAStep(-1, 0, snakeTest);
+                SnakeMove(-1, 0, snake, index, head);
+                CheckDirectionInAStep(-1, 0, snake, index, head);
             }
             else if(stt[a] == 3)
             {
-                SnakeMove(0, 1, snakeTest);
-                CheckDirectionInAStep(0, 1, snakeTest);
+                SnakeMove(0, 1, snake, index, head);
+                CheckDirectionInAStep(0, 1, snake, index, head);
             }
             else if(stt[a] == 4)
             {
-                SnakeMove(0, -1, snakeTest);
-                CheckDirectionInAStep(0, -1, snakeTest);
+                SnakeMove(0, -1, snake, index, head);
+                CheckDirectionInAStep(0, -1, snake, index, head);
 
             }
             
@@ -219,27 +323,33 @@ public class SnakeFindWay : MonoBehaviour
 
     }
     // Di chuyen theo huong do cho den kho khong con di chuyen duoc nua
-    public void CheckDirectionInAStep(int x, int y ,aSnake snakeTest)
+    public void CheckDirectionInAStep(int x, int y ,aSnake snakeTest, int index, bool head)
     {
-        if (CheckDirectionCanMove(x, y, snakeTest.tiles[0].x, snakeTest.tiles[0].y, snakeTest.value))
+        if (CheckDirectionCanMove(x, y, snakeTest.tiles[index].x, snakeTest.tiles[index].y, snakeTest.value))
         {
-            SnakeMove(x, y, snakeTest);
-            CheckDirectionInAStep(x, y, snakeTest);
+            SnakeMove(x, y, snakeTest, index, head);
+            CheckDirectionInAStep(x, y, snakeTest, index, head);
         }
-
+        else
         {
+            screenCapture.TakeScreenShots();
             Debug.Log("Da het duonqg theo huong da chon");
+            StartCoroutine(WaitScreenCapture());
         }
-
+    }
+    public IEnumerator WaitScreenCapture()
+    {
+        yield return new WaitForSeconds(0.1f);
+        SnakeRandomDirectionMove();
     }
     // Di chuyen con ran va thay doi cac gia tri tren ma tran
-    public void SnakeMove(int x, int y, aSnake snakeTest)
+    public void SnakeMove(int x, int y, aSnake snakeTest, int index, bool head)
     {
         ChangeValueOfTheMatrixBeforeSnakeMove(snakeTest);
         
-        var _x = snakeTest.tiles[0].x + x;
-        var _y = snakeTest.tiles[0].y + y;
-        snakeTest.SnakeMove(true,_x, _y);
+        var _x = snakeTest.tiles[index].x + x;
+        var _y = snakeTest.tiles[index].y + y;
+        snakeTest.SnakeMove(head,_x, _y);
         
         ChangeValueOfTheMatrixAfterSnakeMove(snakeTest);
 
@@ -304,6 +414,7 @@ public class SnakeFindWay : MonoBehaviour
         for (int i = 0; i < snakeTest.tiles.Count; i++)
         {
             number[snakeTest.tiles[i].x, snakeTest.tiles[i].y] = 0;
+            TileChangeColor(snakeTest.tiles[i].x, snakeTest.tiles[i].y);
         }
     }
     public void ChangeValueOfTheMatrixAfterSnakeMove(aSnake snakeTest)
@@ -312,8 +423,48 @@ public class SnakeFindWay : MonoBehaviour
         {
             //Debug.Log("It after work in ma trix" +snakeTest.tiles[i].x + "  "+snakeTest.tiles[i].y);
             number[snakeTest.tiles[i].x, snakeTest.tiles[i].y] = snakeTest.value;
+            
+            TileChangeColor(snakeTest.tiles[i].x, snakeTest.tiles[i].y);
         }
     }
+
+    public GameObject TileSprite;
+    public List<Color> Colors;
+    private SpriteRenderer[,] tileObject = new SpriteRenderer[10,10];
+    
+    // Tu cac gia tri cua ma tran se gen ra map tuong ung
+    public void GenerateTileByMatrix()
+    {
+        for(int i = 0; i< 10; i++)
+        {
+            for (int j = 0; j < 10; j++)
+            {
+                var obj = Instantiate(TileSprite, new Vector3( i,  j, 0), quaternion.identity);
+                obj.transform.SetParent(gameObject.transform);
+                var renderer = obj.GetComponent<SpriteRenderer>();
+                tileObject[i, j] = renderer;
+                TileChangeColor(i, j);
+            }
+        }
+        gameObject.transform.Rotate(0.0f, 0.0f, 270.0f, Space.World);
+    }
+    // thay doi mau cua cac tile tai cac toa do tuong ung
+    public void TileChangeColor(int i, int j)
+    {
+        if (number[i, j] == 0)
+        {
+            tileObject[i, j].color = Color.white;
+        }
+        else if (number[i, j] == -1)
+        {
+            tileObject[i, j].color = Color.black;
+        }
+        else
+        {
+            tileObject[i, j].color = Colors[number[i, j]];
+        }
+    }
+    
     // public void SetSnakeDate()
     // {
     //     for (int i = 0; i < lengthOfSnake.Count; i++)

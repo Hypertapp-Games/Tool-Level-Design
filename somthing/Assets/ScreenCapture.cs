@@ -13,12 +13,7 @@ public class ScreenCapture : MonoBehaviour
 
     void Update()
     {
-        timer = DateTime.Now.Second;
-        if (timer != timerTick)
-        {
-            suffixes = 0;
-            timerTick = timer;
-        }
+       
         if (Input.GetKeyDown(KeyCode.P))
         {
             TakeScreenShots();
@@ -27,6 +22,12 @@ public class ScreenCapture : MonoBehaviour
 
     public void TakeScreenShots()
     {
+        timer = DateTime.Now.Second;
+        if (timer != timerTick)
+        {
+            suffixes = 0;
+            timerTick = timer;
+        }
         var time = DateTime.Now.ToString("dd_MM_yyyy (HH:mm:ss)");
         var screenshotname = "Assets/ScreenCapture/" + NameLevelDesign + "_" + time + "_" + suffixes + ".png";
         suffixes++;

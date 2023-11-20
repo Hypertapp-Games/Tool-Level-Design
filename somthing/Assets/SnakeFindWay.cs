@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using Random = UnityEngine.Random;
@@ -177,8 +178,12 @@ public class SnakeFindWay : MonoBehaviour
         GenerateTileByMatrix();
         
     }
-    // Check cac huong co the di chuyen duoc va chon 1 huong ngau nhien de di cho den khi khong con di duoc theo huong do nua
+    
     public int CurrentCheck = 0;
+    public aSnake snakePrioritize = new aSnake();
+    public bool headPrioritize;
+    
+    // Check cac huong co the di chuyen duoc va chon 1 huong ngau nhien de di cho den khi khong con di duoc theo huong do nua
     public void SnakeRandomDirectionMove()
     {
         CurrentCheck++;
@@ -188,30 +193,58 @@ public class SnakeFindWay : MonoBehaviour
             List<SnakeMoveDirection> snakeMoveDirections = new List<SnakeMoveDirection>();
             for (int i = 0; i < Snakes.Count; i++)
             {
-                if (CheckSnakeCanMoveOrNot(Snakes[i], true))
+                // Neu con ran la loai khong uu tien thi khong them vao list de chon
+                if (CheckSnakeCanMoveOrNot(Snakes[i], true) && Snakes[i].value != snakePrioritize.value)
                 {
                     var snakeMoveDirection = new SnakeMoveDirection(Snakes[i], true);
                     snakeMoveDirections.Add(snakeMoveDirection);
                 }
-                if (CheckSnakeCanMoveOrNot(Snakes[i], false))
+                if (CheckSnakeCanMoveOrNot(Snakes[i], false)&& Snakes[i].value != snakePrioritize.value)
                 {
                     var snakeMoveDirection = new SnakeMoveDirection(Snakes[i], false);
                     snakeMoveDirections.Add(snakeMoveDirection);
                 }
             }
 
-            if (snakeMoveDirections.Count <= 0)
+            bool PrioritizeNotRight = true;
+            try
             {
-                CurrentCheck = 20;
-                // khong tiep tuc check nua
+                if (CheckSnakeCanMoveOrNot(snakePrioritize, headPrioritize) && snakePrioritize.value != null)
+                {
+                    Debug.Log("Tiep tuc thoi");
+                    var snake = snakePrioritize;
+                    var head = headPrioritize;
+                    CheckDirectionInAStep(snake, head);
+                    PrioritizeNotRight = false;
+
+                }
             }
-            else
+            catch (Exception e)
             {
-                var snakeMoveDirection = snakeMoveDirections[Random.Range(0, snakeMoveDirections.Count - 1)];
-                var snake = snakeMoveDirection.Snake;
-                var head = snakeMoveDirection.head;
-                CheckDirectionInAStep(snake, head);
+                PrioritizeNotRight = true;
             }
+
+            if (PrioritizeNotRight)
+            {
+                if (snakeMoveDirections.Count <= 0)// check lai lan nua
+                {
+                    //khong lam gi het
+                    //Debug.Log("khong tiep tuc check nua");
+                    // khong tiep tuc check nua
+                }
+                else
+                {
+                    Debug.Log("Dung cai moi");
+                    var snakeMoveDirection = snakeMoveDirections[Random.Range(0, snakeMoveDirections.Count - 1)];
+                    var snake = snakeMoveDirection.Snake;
+                    snakePrioritize = snake;
+                    var head = snakeMoveDirection.head;
+                    headPrioritize = head;
+                    CheckDirectionInAStep(snake, head);
+                    
+                }
+            }
+            
             //CheckDirectionInAStep(snakeTest);
             
         }
@@ -334,6 +367,7 @@ public class SnakeFindWay : MonoBehaviour
         {
             screenCapture.TakeScreenShots();
             Debug.Log("Da het duonqg theo huong da chon");
+            // Chup man hinh, file png dc lu trong folder ScreenCapture;
             StartCoroutine(WaitScreenCapture());
         }
     }
@@ -355,7 +389,7 @@ public class SnakeFindWay : MonoBehaviour
 
     }
     
-    public bool CheckDirectionCanMove(int x, int y, int currentX, int currentY, int value) // check cac huong co the di chuyen duoc
+    public bool CheckDirectionCanMove(int x, int y, int currentX, int currentY, int value) // check huong chi dinh co the di chuyen duoc hay khong
     {
         bool right = false;
         var _x = currentX + x;

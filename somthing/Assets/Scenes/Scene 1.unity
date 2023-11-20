@@ -236,6 +236,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23b72e88caab5459599f7711d7d51c8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Snakes: []
+  allIdOfSnake: 
 --- !u!4 &1810904252
 Transform:
   m_ObjectHideFlags: 0
@@ -244,7 +246,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1810904250}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.4199424, y: 0.28893426, z: -0.119518526}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

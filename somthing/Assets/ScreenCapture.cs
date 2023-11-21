@@ -10,15 +10,7 @@ public class ScreenCapture : MonoBehaviour
     private int suffixes;
     private float timer;
     public float timerTick;
-
-    void Update()
-    {
-       
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            TakeScreenShots();
-        }
-    }
+    
 
     public void TakeScreenShots()
     {
@@ -32,6 +24,5 @@ public class ScreenCapture : MonoBehaviour
         var screenshotname = "Assets/ScreenCapture/" + NameLevelDesign + "_" + time + "_" + suffixes + ".png";
         suffixes++;
         UnityEngine.ScreenCapture.CaptureScreenshot(screenshotname);
-        //Debug.Log("A screenshot was taken!");
     }
 }

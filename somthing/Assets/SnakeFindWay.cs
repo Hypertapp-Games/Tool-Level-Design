@@ -85,6 +85,9 @@ public class SnakeFindWay : MonoBehaviour
             this.head = head;
         }
     }
+    
+    [Header("Số ScreenCapture muốn trong 1 lần chạy ")]
+    public int numberCaptures = 100;
 
     public List<aSnake> Snakes = new List<aSnake>();
     [SerializeField] private int[,] number;
@@ -187,7 +190,7 @@ public class SnakeFindWay : MonoBehaviour
     public void SnakeRandomDirectionMove()
     {
         CurrentCheck++;
-        if (CurrentCheck < 100)
+        if (CurrentCheck < numberCaptures)
         {
             //var snakeTest = Snakes[0];
             List<SnakeMoveDirection> snakeMoveDirections = new List<SnakeMoveDirection>();
@@ -211,7 +214,7 @@ public class SnakeFindWay : MonoBehaviour
             {
                 if (CheckSnakeCanMoveOrNot(snakePrioritize, headPrioritize) && snakePrioritize.value != null)
                 {
-                    Debug.Log("Tiep tuc thoi");
+                    //Debug.Log("Tiep tuc thoi");
                     var snake = snakePrioritize;
                     var head = headPrioritize;
                     CheckDirectionInAStep(snake, head);
@@ -228,13 +231,12 @@ public class SnakeFindWay : MonoBehaviour
             {
                 if (snakeMoveDirections.Count <= 0)// check lai lan nua
                 {
-                    //khong lam gi het
                     //Debug.Log("khong tiep tuc check nua");
-                    // khong tiep tuc check nua
+                    //khong tiep tuc check nua
                 }
                 else
                 {
-                    Debug.Log("Dung cai moi");
+                    //Debug.Log("Dung cai moi");
                     var snakeMoveDirection = snakeMoveDirections[Random.Range(0, snakeMoveDirections.Count - 1)];
                     var snake = snakeMoveDirection.Snake;
                     snakePrioritize = snake;

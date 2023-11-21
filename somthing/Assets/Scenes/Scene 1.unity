@@ -241,9 +241,10 @@ MonoBehaviour:
   allIdOfSnake: 
   screenCapture: {fileID: 1810904253}
   CurrentCheck: 0
-  snakeNotPrioritize:
+  snakePrioritize:
     tiles: []
     value: 0
+  headPrioritize: 0
   TileSprite: {fileID: 7005415842899795480, guid: 5de9de418f9cc46a697305d9df300a6b, type: 3}
   Colors:
   - {r: 1, g: 0.7070736, b: 0, a: 1}
@@ -251,6 +252,7 @@ MonoBehaviour:
   - {r: 1, g: 0, b: 0.8929987, a: 1}
   - {r: 0.08025527, g: 1, b: 0, a: 1}
   - {r: 1, g: 0.009601235, b: 0, a: 1}
+  - {r: 0.023139905, g: 0.9811321, b: 0.82927483, a: 1}
 --- !u!4 &1810904252
 Transform:
   m_ObjectHideFlags: 0
@@ -278,5 +280,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a69d2f2b8a4c54b9995f09b3131ff6f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NameLevelDesign: Level 1
+  NameLevelDesign: Level 2
   timerTick: 0

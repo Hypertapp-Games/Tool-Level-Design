@@ -241,6 +241,8 @@ MonoBehaviour:
   Snakes: []
   allIdOfSnake: 
   screenCapture: {fileID: 1810904253}
+  Width: 10
+  Height: 10
   CurrentCheck: 0
   snakePrioritize:
     tiles: []

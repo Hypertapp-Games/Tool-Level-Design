@@ -93,6 +93,10 @@ public class SnakeFindWay : MonoBehaviour
     [SerializeField] private int[,] number;
     public List<int> allIdOfSnake = new List<int>();
     public ScreenCapture screenCapture;
+    
+    [Header("Nhập kích thước ma trận ở đây ")]
+    public int Width = 0;
+    public int Height = 0;
     void Start()
     {
         // 0 la cac vung trong va co the di chuyen duoc
@@ -120,9 +124,9 @@ public class SnakeFindWay : MonoBehaviour
     // Lay tat ca id cua cac con ran co trong ma tran
     void LoadSnakeIDFromMatrix()
     {
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < Width; i++)
         {
-            for (int j = 0; j < 10; j++)
+            for (int j = 0; j < Height; j++)
             {
                 if (number[i, j] != 0 && number[i, j] != -1)
                 {
@@ -141,9 +145,9 @@ public class SnakeFindWay : MonoBehaviour
         {
             List<aTile> tiles = new List<aTile>();
             int value = 0;
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < Width; i++)
             {
-                for (int j = 0; j < 10; j++)
+                for (int j = 0; j < Height; j++)
                 {
                     try
                     {
@@ -499,9 +503,9 @@ public class SnakeFindWay : MonoBehaviour
     // Tu cac gia tri cua ma tran se gen ra map tuong ung
     public void GenerateTileByMatrix()
     {
-        for(int i = 0; i< 10; i++)
+        for(int i = 0; i< Width; i++)
         {
-            for (int j = 0; j < 10; j++)
+            for (int j = 0; j < Height; j++)
             {
                 var obj = Instantiate(TileSprite, new Vector3( i,  j, 0), quaternion.identity);
                 obj.transform.SetParent(gameObject.transform);

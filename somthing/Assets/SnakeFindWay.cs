@@ -100,14 +100,14 @@ public class SnakeFindWay : MonoBehaviour
         // cac so khac tuong truong cho cac phan cua cac con ran
         number = new int[10, 10]
         {
-            { 12,  13,  0 , 31, 32 ,   -1, -1, -1, -1, -1 },
-            { 11, -1 , -1 , -1, 33 ,   -1, -1, -1, -1, -1 },
-            { 0 , -1 , -1 , -1, 0 ,   -1, -1, -1, -1, -1 },
-            { 0 , -1 , -1 , -1, 43 ,   -1, -1, -1, -1, -1 },
-            { 21,  22,  23, 41, 42 ,   -1, -1, -1, -1, -1 },
-            
-            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
-            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { -1 , 11  ,-1 , 0, 43 , 42, 41,    -1, -1, -1 },
+            { -1 , 12 , 0 , 0, 0  , -1 , 0,    -1, -1, -1 },
+            {  0 , 13 ,-1 , -1,-1  , -1 ,  0,    -1, -1, -1 },
+            { -1 , 0  ,-1 , -1,0  , 0 ,  0,    -1, -1, -1 },
+            { -1 , 0  , 0 , 0, 0  , 0 , -1,    -1, -1, -1 },
+            { 22 , 23 ,-1 , 0, 31 , 32, 33,    -1, -1, -1 },
+            { 21 ,-1  ,-1 ,-1, -1 , -1 , 34,    -1, -1, -1 },
+                
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
@@ -193,22 +193,6 @@ public class SnakeFindWay : MonoBehaviour
         if (CurrentCheck < numberCaptures)
         {
             //var snakeTest = Snakes[0];
-            List<SnakeMoveDirection> snakeMoveDirections = new List<SnakeMoveDirection>();
-            for (int i = 0; i < Snakes.Count; i++)
-            {
-                // Neu con ran la loai khong uu tien thi khong them vao list de chon
-                if (CheckSnakeCanMoveOrNot(Snakes[i], true) && Snakes[i].value != snakePrioritize.value)
-                {
-                    var snakeMoveDirection = new SnakeMoveDirection(Snakes[i], true);
-                    snakeMoveDirections.Add(snakeMoveDirection);
-                }
-                if (CheckSnakeCanMoveOrNot(Snakes[i], false)&& Snakes[i].value != snakePrioritize.value)
-                {
-                    var snakeMoveDirection = new SnakeMoveDirection(Snakes[i], false);
-                    snakeMoveDirections.Add(snakeMoveDirection);
-                }
-            }
-
             bool PrioritizeNotRight = true;
             try
             {
@@ -222,6 +206,7 @@ public class SnakeFindWay : MonoBehaviour
 
                 }
             }
+            
             catch (Exception e)
             {
                 PrioritizeNotRight = true;
@@ -229,22 +214,65 @@ public class SnakeFindWay : MonoBehaviour
 
             if (PrioritizeNotRight)
             {
-                if (snakeMoveDirections.Count <= 0)// check lai lan nua
+                List<SnakeMoveDirection> snakeMoveDirections = new List<SnakeMoveDirection>();
+                List<aSnake> tempSnake = new List<aSnake>();
+                for (int i = 0; i < Snakes.Count; i++)
                 {
+                    // Neu con ran la loai khong uu tien thi khong them vao list de chon
+                    bool snakeCanMove = false;
+                    
+                    if (CheckSnakeCanMoveOrNot(Snakes[i], true) && Snakes[i].value != snakePrioritize.value)
+                    {
+                        // var snakeMoveDirection = new SnakeMoveDirection(Snakes[i], true);
+                        // snakeMoveDirections.Add(snakeMoveDirection);
+                        snakeCanMove = true;
+                    }
+                    if (CheckSnakeCanMoveOrNot(Snakes[i], false)&& Snakes[i].value != snakePrioritize.value)
+                    {
+                        // var snakeMoveDirection = new SnakeMoveDirection(Snakes[i], false);
+                        // snakeMoveDirections.Add(snakeMoveDirection);
+                        snakeCanMove = true;
+                    }
+
+                    if (snakeCanMove)
+                    {
+                        tempSnake.Add(Snakes[i]);
+                    }
+                }
+                
+                if (tempSnake.Count <= 0)// check lai lan nua
+                {
+                    
                     //Debug.Log("khong tiep tuc check nua");
                     //khong tiep tuc check nua
                 }
                 else
                 {
-                    //Debug.Log("Dung cai moi");
-                    var snakeMoveDirection = snakeMoveDirections[Random.Range(0, snakeMoveDirections.Count - 1)];
-                    var snake = snakeMoveDirection.Snake;
+                    var atempSnake = tempSnake[Random.Range(0, tempSnake.Count)];
+                    if (CheckSnakeCanMoveOrNot(atempSnake, true))
+                    {
+                        var snakeMoveDirection = new SnakeMoveDirection(atempSnake, true);
+                        snakeMoveDirections.Add(snakeMoveDirection);
+                    }
+                    if (CheckSnakeCanMoveOrNot(atempSnake, false))
+                    {
+                        var snakeMoveDirection = new SnakeMoveDirection(atempSnake, false);
+                        snakeMoveDirections.Add(snakeMoveDirection);
+                    }
+                    
+                    var asnakeMoveDirection = snakeMoveDirections[Random.Range(0, snakeMoveDirections.Count)];
+                    var snake = asnakeMoveDirection.Snake;
                     snakePrioritize = snake;
-                    var head = snakeMoveDirection.head;
+                    var head = asnakeMoveDirection.head;
                     headPrioritize = head;
                     CheckDirectionInAStep(snake, head);
-                    
                 }
+                // else
+                // {
+                //     //Debug.Log("Dung cai moi");
+                //     
+                //     
+                // }
             }
             
             //CheckDirectionInAStep(snakeTest);

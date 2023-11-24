@@ -237,6 +237,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23b72e88caab5459599f7711d7d51c8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  numberCaptures: 200
   Snakes: []
   allIdOfSnake: 
   screenCapture: {fileID: 1810904253}

@@ -106,13 +106,14 @@ public class SnakeFindWay : MonoBehaviour
         // other: snake
         number = new int[10, 10]
         {
-            { 12, 13,  0, 31, 32, 33, -1, -1, -1, -1 },
-            { 11, -1, -1, -1, -1, 0 , -1, -1, -1, -1 },
-            { 0 , -1, -1, -1, -1, 0 , -1, -1, -1, -1 },
-            { 0 , -1, -1, -1, -1, 0 , -1, -1, -1, -1 },
-            { 21, -1, -1, -1, -1, 43, -1, -1, -1, -1 },
-            { 22, 23, 24,  0, 41, 42, -1, -1, -1, -1 },
-            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { -1 , 11  ,-1 , 0, 43 , 42, 41,    -1, -1, -1 },
+            { -1 , 12 , 0 , 0, 0  , -1 , 0,    -1, -1, -1 },
+            {  0 , 13 ,-1 , -1,-1  , -1 ,  0,    -1, -1, -1 },
+            { -1 , 0  ,-1 , -1,0  , 0 ,  0,    -1, -1, -1 },
+            { -1 , 0  , 0 , 0, 0  , 0 , -1,    -1, -1, -1 },
+            { 22 , 23 ,-1 , 0, 31 , 32, 33,    -1, -1, -1 },
+            { 21 ,-1  ,-1 ,-1, -1 , -1 , 34,    -1, -1, -1 },
+                        
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
@@ -238,6 +239,7 @@ public class SnakeFindWay : MonoBehaviour
             if (snakeMoveDirections.Count > 0)
             {
                 SnakeMoveDirection selectedMoveDirection = snakeMoveDirections[Random.Range(0, snakeMoveDirections.Count)];
+                CleanColor();
                 CheckDirectionInAStep(selectedMoveDirection.Snake, selectedMoveDirection.head);
             }
             else
@@ -376,8 +378,12 @@ public class SnakeFindWay : MonoBehaviour
     {
         for (int i = 0; i < snake.tiles.Count; i++)
         {
+            var color = Colors[number[snake.tiles[i].x, snake.tiles[i].y]];
+            color.a = 0.3f;
+            tileObject[snake.tiles[i].x, snake.tiles[i].y].color = color;
+            
             number[snake.tiles[i].x, snake.tiles[i].y] = 0;
-            TileChangeColor(snake.tiles[i].x, snake.tiles[i].y);
+            //TileChangeColor(snake.tiles[i].x, snake.tiles[i].y);
         }
     }
     // Input: aSnake  "snake"
@@ -413,6 +419,17 @@ public class SnakeFindWay : MonoBehaviour
             }
         }
         gameObject.transform.Rotate(0.0f, 0.0f, 270.0f, Space.World);
+    }
+
+    public void CleanColor()
+    {
+        for(int i = 0; i< Width; i++)
+        {
+            for (int j = 0; j < Height; j++)
+            {
+                TileChangeColor(i, j);
+            }
+        }
     }
     // InPut: i is row index of the tile to change color.
     //        j is column index of the tile to change color.
@@ -463,6 +480,16 @@ public class SnakeFindWay : MonoBehaviour
     // { 22 , 23 ,-1 , 0, 31 , 32, 33,    -1, -1, -1 },
     // { 21 ,-1  ,-1 ,-1, -1 , -1 , 34,    -1, -1, -1 },
     //             
+    // { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+    // { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+    // { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+    // { 12, 13,  0, 31, 32, 33, -1, -1, -1, -1 },
+    // { 11, -1, -1, -1, -1, 0 , -1, -1, -1, -1 },
+    // { 0 , -1, -1, -1, -1, 0 , -1, -1, -1, -1 },
+    // { 0 , -1, -1, -1, -1, 0 , -1, -1, -1, -1 },
+    // { 21, -1, -1, -1, -1, 43, -1, -1, -1, -1 },
+    // { 22, 23, 24,  0, 41, 42, -1, -1, -1, -1 },
+    // { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
     // { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
     // { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
     // { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },

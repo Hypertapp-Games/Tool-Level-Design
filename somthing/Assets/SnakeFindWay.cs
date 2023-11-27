@@ -203,6 +203,7 @@ public class SnakeFindWay : MonoBehaviour
     //         select random a SnakeMoveDirection  in list "snakeMoveDirections" and call function "CheckDirectionInAStep" with "snakeMoveDirection.Snake" and "snakeMoveDirection.head"
     public void SnakeRandomDirectionMove()
     {
+        CleanMatrix();
         CurrentCheck++;
         if (CurrentCheck >= numberCaptures)
         {
@@ -239,7 +240,7 @@ public class SnakeFindWay : MonoBehaviour
             if (snakeMoveDirections.Count > 0)
             {
                 SnakeMoveDirection selectedMoveDirection = snakeMoveDirections[Random.Range(0, snakeMoveDirections.Count)];
-                CleanColor();
+                
                 CheckDirectionInAStep(selectedMoveDirection.Snake, selectedMoveDirection.head);
             }
             else
@@ -382,7 +383,7 @@ public class SnakeFindWay : MonoBehaviour
             color.a = 0.3f;
             tileObject[snake.tiles[i].x, snake.tiles[i].y].color = color;
             
-            number[snake.tiles[i].x, snake.tiles[i].y] = 0;
+            number[snake.tiles[i].x, snake.tiles[i].y] = 100;
             //TileChangeColor(snake.tiles[i].x, snake.tiles[i].y);
         }
     }
@@ -421,12 +422,17 @@ public class SnakeFindWay : MonoBehaviour
         gameObject.transform.Rotate(0.0f, 0.0f, 270.0f, Space.World);
     }
 
-    public void CleanColor()
+    public void CleanMatrix()
     {
         for(int i = 0; i< Width; i++)
         {
             for (int j = 0; j < Height; j++)
             {
+                
+                if (number[i, j] == 100)
+                {
+                    number[i, j] = 0;
+                }
                 TileChangeColor(i, j);
             }
         }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Unity.Mathematics;
 using UnityEngine;
 using Random = System.Random;
 
@@ -37,12 +38,15 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
     
     private Dictionary<int, Snake> allIdOfSnakes = new Dictionary<int, Snake>();
     private List<Snake> allSnakes;
-    public int SPEED = 1;
+    public float SPEED = 1;
     public void Start()
     {
+        allSnakes = new List<Snake>();
         ROWS = grid.GetLength(0);
         COLS = grid.GetLength(1);
         LoadSnakeFromMatrix();
+        GenerateTileByMatrix();
+        SolvePuzzle(grid);
     }
     void LoadSnakeFromMatrix()
     {
@@ -110,11 +114,29 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
         }
         return true;
     }
+    public bool CheckSnakeFindHole(int row, int col, Snake snake)
+    {
+        if (grid[row, col].ToString().Length == 3)
+        {
+            if (Int32.Parse(grid[row, col].ToString()[2].ToString()) == snake.snakeID)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return false;
+    }
     public bool SolvePuzzle(int[,] grid)
     {
-        //DrawGrid(30); // 30 is the width of each square on the grid
+        DrawGird();
         Thread.Sleep((int)(1000 * (1 - SPEED)));
-        List<Snake> shuffledAllSnake = ShuffleList(allSnakes);
+        
+        List<Snake> shuffledAllSnake = new List<Snake>(ShuffleList(allSnakes));
+        if (Solved(grid))
+            return true;
         foreach (var snake in shuffledAllSnake)
         {
             for (int i = 1; i <= 2; i++)
@@ -137,18 +159,43 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
                 {
                     directions.Add("right");       
                 }
+                if(CheckSnakeFindHole(snake.allTile[index][0], snake.allTile[index][1] + 1,snake))
+                {
+                    allSnakes.Remove(snake);
+                    SolvePuzzle(grid);
+                    return true;
+                }
                 if (CheckCanMoveWithThisDirections(snake.allTile[index][0], snake.allTile[index][1] - 1))
                 {
                     directions.Add("left");       
+                }
+                if(CheckSnakeFindHole(snake.allTile[index][0], snake.allTile[index][1] - 1,snake))
+                {
+                    allSnakes.Remove(snake);
+                    SolvePuzzle(grid);
+                    return true;
                 }
                 if (CheckCanMoveWithThisDirections(snake.allTile[index][0] + 1, snake.allTile[index][1]))
                 {
                     directions.Add("down");       
                 }
+                if(CheckSnakeFindHole(snake.allTile[index][0]+1, snake.allTile[index][1],snake))
+                {
+                    allSnakes.Remove(snake);
+                    SolvePuzzle(grid);
+                    return true;
+                }
                 if (CheckCanMoveWithThisDirections(snake.allTile[index][0] - 1, snake.allTile[index][1]))
                 {
                     directions.Add("up");       
                 }
+                if(CheckSnakeFindHole(snake.allTile[index][0] -1, snake.allTile[index][1],snake))
+                {
+                    allSnakes.Remove(snake);
+                    SolvePuzzle(grid);
+                    return true;
+                }
+                Debug.Log(snake.snakeID +""+ directions.Count);
                  if (directions.Count == 0)
                     return false;
 
@@ -410,6 +457,7 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
                             break;
                     }
                 }
+               // return false;
             }
         }
         return false;
@@ -417,17 +465,12 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
 
     public bool Solved(int[,] grid)
     {
-        for (int row = 1; row < ROWS - 1; row++)
+        if (allSnakes.Count > 0)
         {
-            for (int column = 1; column < COLS - 1; column++)
-            {
-                if (grid[row, column] != 0 || grid[row, column] != 1)
-                {
-                    return false;
-                }
-            }
+            
+            return false;
         }
-
+        Debug.Log("solved");
         return true;
     }
     void Log() //Khong quan trong
@@ -440,6 +483,63 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
                 Debug.Log($"  Tile: ({tile[0]}, {tile[1]})");
             }
         }
+    }
+
+    public GameObject tileSprite;
+    public List<Color> Colors;
+    public List<Color> HoleColors;
+    private SpriteRenderer[,] tileObject = new SpriteRenderer[10,10];
+    public void GenerateTileByMatrix()
+    {
+        for(int i = 0; i< ROWS; i++)
+        {
+            for (int j = 0; j < COLS; j++)
+            {
+                var obj = Instantiate(tileSprite, new Vector3( i,  j, 0), quaternion.identity);
+                obj.transform.SetParent(gameObject.transform);
+                var renderer = obj.GetComponent<SpriteRenderer>();
+                tileObject[i, j] = renderer;
+                
+                TileChangeColor(i, j);
+            }
+        }
+        gameObject.transform.Rotate(0.0f, 0.0f, 270.0f, Space.World);
+    }
+
+    public void DrawGird()
+    {
+        for(int i = 0; i< ROWS; i++)
+        {
+            for (int j = 0; j < COLS; j++)
+            {
+                TileChangeColor(i, j);
+            }
+        }
+    }
+    public void TileChangeColor(int row, int col)
+    {
+        if (grid[row, col].ToString().Length == 1)
+        {
+            if (grid[row, col] == 0)
+            {
+                tileObject[row, col].color = Color.white;
+            }
+            else if (grid[row, col] == -1)
+            {
+                tileObject[row, col].color = Color.black;
+            }
+            else 
+            {
+                tileObject[row, col].color = Colors[grid[row, col]];
+            }
+        }
+        else
+        {
+            int index = Int32.Parse(grid[row, col].ToString()[2].ToString());
+            tileObject[row, col].color = HoleColors[index];
+            
+        }
+      
     }
    
     

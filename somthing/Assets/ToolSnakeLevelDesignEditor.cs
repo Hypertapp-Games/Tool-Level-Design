@@ -1,12 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using TMPro;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 public class ToolSnakeLevelDesignEditor : MonoBehaviour
 {
@@ -193,8 +196,6 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
         {
             id = 1;
         }
-        
-        
         if (isHole)
         {
             tile.transform.GetChild(0).gameObject.SetActive(true);
@@ -716,7 +717,7 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
          }
          return false;
      }
-     public void ChangeValueOfTheMatrixBeforeSnakeMove(Snake snake)
+     void ChangeValueOfTheMatrixBeforeSnakeMove(Snake snake)
      {
          for (int i = 0; i < snake.allTile.Count; i++)
          {
@@ -724,7 +725,7 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
              ChangeTileColor(gridObject[snake.allTile[i].x, snake.allTile[i].y], tileColors[1], 0);
          }
      }
-     public void ChangeValueOfTheMatrixAfterSnakeMove(Snake snake)
+     void ChangeValueOfTheMatrixAfterSnakeMove(Snake snake)
      {
          for (int i = 0; i < snake.allTile.Count; i++)
          {
@@ -737,6 +738,148 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
          tile.transform.GetChild(0).gameObject.SetActive(false);
          tile.GetComponent<SpriteRenderer>().color = color;
      }
+     public void ExportBtnClick()
+     {
+         // Đường dẫn tệp văn bản để lưu trữ
+         var time = DateTime.Now.ToString("dd_MM_yyyy (HH:mm:ss)");
+         string filePath = "Assets/ScreenCapture/arrayData" +time+ ".txt";
+
+         // Ghi mảng vào tệp văn bản
+         SaveArrayToFile(filePath, grid);
+
+         Debug.Log("Dữ liệu đã được lưu vào tệp văn bản.");
+     }
+     void SaveArrayToFile(string filePath, int[,] arrayToSave)
+     {
+         // Mở tệp để ghi
+         using (StreamWriter writer = new StreamWriter(filePath))
+         {
+             // Duyệt qua từng phần tử trong mảng và ghi vào tệp
+             for (int i = 0; i < arrayToSave.GetLength(0); i++)
+             {
+                 for (int j = 0; j < arrayToSave.GetLength(1); j++)
+                 {
+                     writer.Write(arrayToSave[i, j]);
+
+                     // Thêm dấu phẩy giữa các phần tử
+                     if (j < arrayToSave.GetLength(1) - 1)
+                     {
+                         writer.Write(",");
+                     }
+                 }
+
+                 // Xuống dòng sau mỗi hàng
+                 writer.WriteLine();
+             }
+         }
+     }
+
+     [Header("Copy đường dẫn của file text và dán vào đây")]
+     public string filePath;
+
+     public void LoadFileTextToGrid()
+     {
+         if (File.Exists(filePath))
+         {
+             grid = LoadArrayFromFile(filePath);
+             LoadGridVisual();
+         }
+         else
+         {
+             Debug.LogError("Không tìm thấy tệp văn bản.");
+         }
+     }
+     private int[,] LoadArrayFromFile(string filePath)
+     {
+         string[] lines = File.ReadAllLines(filePath);
+
+         // Số hàng và cột dựa trên kích thước của mảng trong tệp
+         int numRows = lines.Length;
+         int numCols = lines[0].Split(',').Length;
+
+         // Tạo mảng để lưu dữ liệu từ tệp
+         grid = new int[numRows, numCols];
+
+         // Duyệt qua từng dòng và cột để lấy dữ liệu từ tệp
+         for (int i = 0; i < numRows; i++)
+         {
+             string[] values = lines[i].Split(',');
+
+             for (int j = 0; j < numCols; j++)
+             {
+                 // Chuyển đổi từ chuỗi sang số nguyên và gán vào mảng
+                 int.TryParse(values[j], out grid[i, j]);
+             }
+         }
+
+         return grid;
+     }
+
+     public void LoadGridVisual()
+     {
+         if (transform.childCount != 0)
+         {
+             foreach (Transform child in transform)
+             {
+                 Destroy(child.gameObject);
+             }
+             transform.DetachChildren();
+         }
+         if (gameObject.transform.childCount == 0)
+         {
+             currentRows = grid.GetLength(0);
+             currentColumns = grid.GetLength(1);
+             
+             gridObject = new GameObject[currentRows, currentColumns];
+             for (int i = 0; i < currentRows; i++)
+             {
+                 for (int j = 0; j < currentColumns; j++)
+                 {
+                     var tile = Instantiate(tileSprite, new Vector3( j,  currentRows - i, 0), quaternion.identity);
+                     gridObject[i, j] = tile;
+                     tile.transform.SetParent(gameObject.transform);
+                     
+                     if (grid[i, j].ToString().Length == 1)
+                     {
+                        
+                         ChangeTileColor(tile, false, grid[i,j]);
+                     }
+                     else
+                     {
+                         ChangeTileColor(tile, true, Int32.Parse(grid[i,j].ToString()[1].ToString()));
+                     }
+                 }
+             }
+         }
+
+         ChangCameraView();      
+     }
+     void ChangeTileColor(GameObject tile, bool isHole, int id)
+     {
+         // hoan doi id cua mau den va mau trang
+         if (id == 1)
+         {
+             id = 0;
+         }
+         else if(id == 0)
+         {
+             id = 1;
+         }
+
+         var color = tileColors[id];
+         if (isHole)
+         {
+             tile.transform.GetChild(0).gameObject.SetActive(true);
+             tile.transform.GetChild(0).gameObject.transform.GetChild(0).GetComponent<SpriteRenderer>().color = color;
+         }
+         else
+         {
+             tile.transform.GetChild(0).gameObject.SetActive(false);
+             tile.GetComponent<SpriteRenderer>().color = color;
+         }
+        
+     }
+     
 
 }
 //new Vector3( column,  currentRows - row, 0)

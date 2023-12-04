@@ -32,6 +32,37 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
          cam = Camera.main;
          ChangeButtonColor();
     }
+    // Input: tileColors, tileButtonPanel, holeButtonPanel
+    // Output: Đổi màu của button
+    void ChangeButtonColor()
+    {
+        List<Image> tileButton = tileButtonPanel.GetComponentsInChildren<Image>().ToList();
+        List<Image> listTileButtonOut = (from element in tileButton
+
+            where element.GetComponent<Button>() == null
+
+            select (Image)element).ToList();
+        tileButton = new List<Image>(listTileButtonOut);
+        
+        for (int i = 0; i < tileButton.Count; i++)
+        {
+            tileButton[i].color = tileColors[i];
+        }
+        
+        
+        List<Image> holeButton = holeButtonPanel.GetComponentsInChildren<Image>().ToList();
+        
+        List<Image> listHoleButtonOut = (from element in holeButton
+
+            where element.GetComponent<Button>() == null
+
+            select (Image)element).ToList();
+        holeButton = new List<Image>(listHoleButtonOut);
+        for (int i = 0; i < holeButton.Count; i++)
+        {
+            holeButton[i].color = tileColors[i+2];
+        }
+    }
 
      private GameObject objInRay1;
      private GameObject objInRay2;
@@ -52,13 +83,14 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
         
         if (Input.GetKeyDown(KeyCode.A))
         {
+            // Không quan trọng
             DeBugNumberAray(grid);
         }
     }
-
+    // Input: mouse position, button (button color, loại button(tile, hole), id của button )
+    // Output: gọi hàm ChangeTileColor
     void ChoseTileUseRayCast()
     {
-        
         Vector3 mousePos = Input.mousePosition;
         mousePos.z = 10f;
         mousePos = cam.ScreenToWorldPoint(mousePos);
@@ -99,15 +131,47 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
             }
         }
     }
+    
+    //Input: Tile đã chọn, button (button color, loại button(tile, hole), id của button )
+    //Output: Đổi màu của tile, đổi dạng của tile (tile bình thường hoặc hole)
+    void ChangeTileColor(GameObject tile, Color color, bool isHole, int id)
+    {
+        // hoan doi id cua mau den va mau trang
+        if (id == 1)
+        {
+            id = 0;
+        }
+        else if(id == 0)
+        {
+            id = 1;
+        }
+        if (isHole)
+        {
+            tile.transform.GetChild(0).gameObject.SetActive(true);
+            tile.transform.GetChild(0).gameObject.transform.GetChild(0).GetComponent<SpriteRenderer>().color = color;
+            grid[(int)(currentRows - tile.transform.position.y), (int)tile.transform.position.x] = 10 + id;
+        }
+        else
+        {
+            tile.transform.GetChild(0).gameObject.SetActive(false);
+            tile.GetComponent<SpriteRenderer>().color = color;
+            grid[(int)(currentRows - tile.transform.position.y), (int)tile.transform.position.x] =id;
+        }
+        
+    }
 
     public TMP_InputField WidthInputField;
     public TMP_InputField HeightInputField;
+    // Input: WidthInputField, HeightInputField (nhập số trên màn hình)
+    // Output: Click ExportSize để gọi hàm GenerateTile
     public void GenerateTileButton()
     {
         rows = int.Parse(WidthInputField.text);
         cols = int.Parse(HeightInputField.text);
         GenerateTile();
     }
+    // Input: WidthInputField, HeightInputField
+    // Output: Generate ra các tile
     void GenerateTile()
     {
         if (transform.childCount != 0)
@@ -138,6 +202,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
         ChangCameraView();
     }
 
+    // Input: Kích thước của mảng gird
+    // Output: Scale camera để các tile không bị lệch ra khỏi màn hình
     void ChangCameraView()
     {
         float minSize = 0;
@@ -155,67 +221,19 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
         cam.orthographicSize = (minSize+1)/2;
     }
 
-    void ChangeButtonColor()
-    {
-        List<Image> tileButton = tileButtonPanel.GetComponentsInChildren<Image>().ToList();
-        List<Image> listTileButtonOut = (from element in tileButton
+   
 
-            where element.GetComponent<Button>() == null
-
-            select (Image)element).ToList();
-        tileButton = new List<Image>(listTileButtonOut);
-        
-        for (int i = 0; i < tileButton.Count; i++)
-        {
-            tileButton[i].color = tileColors[i];
-        }
-        
-        
-        List<Image> holeButton = holeButtonPanel.GetComponentsInChildren<Image>().ToList();
-        
-        List<Image> listHoleButtonOut = (from element in holeButton
-
-            where element.GetComponent<Button>() == null
-
-            select (Image)element).ToList();
-        holeButton = new List<Image>(listHoleButtonOut);
-        for (int i = 0; i < holeButton.Count; i++)
-        {
-            holeButton[i].color = tileColors[i+2];
-        }
-    }
-
-    void ChangeTileColor(GameObject tile, Color color, bool isHole, int id)
-    {
-        // hoan doi id cua mau den va mau trang
-        if (id == 1)
-        {
-            id = 0;
-        }
-        else if(id == 0)
-        {
-            id = 1;
-        }
-        if (isHole)
-        {
-            tile.transform.GetChild(0).gameObject.SetActive(true);
-            tile.transform.GetChild(0).gameObject.transform.GetChild(0).GetComponent<SpriteRenderer>().color = color;
-            grid[(int)(currentRows - tile.transform.position.y), (int)tile.transform.position.x] = 10 + id;
-        }
-        else
-        {
-            tile.transform.GetChild(0).gameObject.SetActive(false);
-            tile.GetComponent<SpriteRenderer>().color = color;
-            grid[(int)(currentRows - tile.transform.position.y), (int)tile.transform.position.x] =id;
-        }
-        
-    }
+    
 
     private Color colorChange;
     private bool isHole;
     private int id;
     private Image currentButtonSelect;
     
+    
+    // Input: Click vào button
+    // Output: Lưu thông tin của button (button color, loại button(tile, hole), id của button ).
+    //         Button đang được chọn sẽ được hightlight, lúc này khi click vào các tile trên màn hình sẽ đổi màu tương ứng với thông tin của button
     public void TileAndHoleButtonClick()
     {
         if (currentButtonSelect != null)
@@ -247,55 +265,20 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
 
        
     }
-     void DeBugNumberAray(int[,] number)
-        {
-            // Debug.Log("       " + number[0, 0] + "       " + number[0, 1] + "       " + number[0, 2] + "       " + number[0, 3] + "       " + number[0, 4]);
-            // Debug.Log("       " + number[1, 0] + "       " + number[1, 1] + "       " + number[1, 2] + "       " + number[1, 3] + "       " + number[1, 4]);
-            // Debug.Log("       " + number[2, 0] + "       " + number[2, 1] + "       " + number[2, 2] + "       " + number[2, 3] + "       " + number[2, 4]);
-            // Debug.Log("       " + number[3, 0] + "       " + number[3, 1] + "       " + number[3, 2] + "       " + number[3, 3] + "       " + number[3, 4]);
-            // Debug.Log("       " + number[4, 0] + "       " + number[4, 1] + "       " + number[4, 2] + "       " + number[4, 3] + "       " + number[4, 4]);
-            Debug.Log("       " + number[0, 0] + "       " + number[0, 1] + "       " + number[0, 2] + "       " +
-                      number[0, 3] + "       " + number[0, 4] + "       " + number[0, 5] + "       " + number[0, 6] +
-                      "       " + number[0, 7] + "       " + number[0, 8] + "       " + number[0, 9]);
-            Debug.Log("       " + number[1, 0] + "       " + number[1, 1] + "       " + number[1, 2] + "       " +
-                      number[1, 3] + "       " + number[1, 4] + "       " + number[1, 5] + "       " + number[1, 6] +
-                      "       " + number[1, 7] + "       " + number[1, 8] + "       " + number[1, 9]);
-            Debug.Log("       " + number[2, 0] + "       " + number[2, 1] + "       " + number[2, 2] + "       " +
-                      number[2, 3] + "       " + number[2, 4] + "       " + number[2, 5] + "       " + number[2, 6] +
-                      "       " + number[2, 7] + "       " + number[2, 8] + "       " + number[2, 9]);
-            Debug.Log("       " + number[3, 0] + "       " + number[3, 1] + "       " + number[3, 2] + "       " +
-                      number[3, 3] + "       " + number[3, 4] + "       " + number[3, 5] + "       " + number[3, 6] +
-                      "       " + number[3, 7] + "       " + number[3, 8] + "       " + number[3, 9]);
-            Debug.Log("       " + number[4, 0] + "       " + number[4, 1] + "       " + number[4, 2] + "       " +
-                      number[4, 3] + "       " + number[4, 4] + "       " + number[4, 5] + "       " + number[4, 6] +
-                      "       " + number[4, 7] + "       " + number[4, 8] + "       " + number[4, 9]);
-            Debug.Log("       " + number[5, 0] + "       " + number[5, 1] + "       " + number[5, 2] + "       " +
-                      number[5, 3] + "       " + number[5, 4] + "       " + number[5, 5] + "       " + number[5, 6] +
-                      "       " + number[5, 7] + "       " + number[5, 8] + "       " + number[5, 9]);
-            Debug.Log("       " + number[6, 0] + "       " + number[6, 1] + "       " + number[6, 2] + "       " +
-                      number[6, 3] + "       " + number[6, 4] + "       " + number[6, 5] + "       " + number[6, 6] +
-                      "       " + number[6, 7] + "       " + number[6, 8] + "       " + number[6, 9]);
-            Debug.Log("       " + number[7, 0] + "       " + number[7, 1] + "       " + number[7, 2] + "       " +
-                      number[7, 3] + "       " + number[7, 4] + "       " + number[7, 5] + "       " + number[7, 6] +
-                      "       " + number[7, 7] + "       " + number[7, 8] + "       " + number[7, 9]);
-            Debug.Log("       " + number[8, 0] + "       " + number[8, 1] + "       " + number[8, 2] + "       " +
-                      number[8, 3] + "       " + number[8, 4] + "       " + number[8, 5] + "       " + number[8, 6] +
-                      "       " + number[8, 7] + "       " + number[8, 8] + "       " + number[8, 9]);
-            Debug.Log("       " + number[9, 0] + "       " + number[9, 1] + "       " + number[9, 2] + "       " +
-                      number[9, 3] + "       " + number[9, 4] + "       " + number[9, 5] + "       " + number[9, 6] +
-                      "       " + number[9, 7] + "       " + number[9, 8] + "       " + number[9, 9]);
-        }
-
+    
+    // Bật PlayMode;
      public void PlayModeOn_Button()
      {
          isPlayMode = true;
          PlayMode();
      }
+     // Bật EditMode;
      public void EditModeOn_Button()
      {
          isPlayMode = false;
      }
      // This is code PlayMode
+     
      [Serializable]
      public  struct Tile
      {
@@ -324,7 +307,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
              this.adjacentTile = adjacentTile;
              this.snakeID = snakeID;
          }
-
+        // Input: bool Head(tile được chọn là head hay tail), giá trị x và y mới, gameObject được gán mới
+        // Output: Thay đổi các giá trị từng tile của snake
          public void SnakeMove(bool head, int x, int y, GameObject gameobject)
          {
              if (head)
@@ -366,6 +350,9 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
          allSnakes.Clear();
          LoadSnakeFromMatrix();
      }
+     
+     // Input: mảng 2 chiều grid
+     // Output: list lưu trữ tất cả snake có trong grid: allSnakes
      void LoadSnakeFromMatrix()
      {
          for (int row = 0; row < currentRows; row++)
@@ -399,11 +386,18 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
          {
              allSnakes.Add(snake.Value);
          }
-
-         LoadAdjacentTileOfEachTile();
-
+         SortSnake();
      }
 
+     
+     // Input: allSnakes
+     // Output: gọi hàm LoadAdjacentTileOfEachTile
+     void SortSnake()
+     {
+         LoadAdjacentTileOfEachTile();
+     }
+     //Input: allSnakes;
+     //Output: với mỗi snake trong allSnakes, với mỗi tile trong snake kiểm tra các tile liền kề và thêm vào adjacentTile
      void LoadAdjacentTileOfEachTile()
      {
          for (int i = 0; i < allSnakes.Count; i++)
@@ -434,18 +428,11 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
               
              }
          }
-         // foreach (var adjacentTile in  allSnakes[0].adjacentTile)
-         // {
-         //     for (int i = 0; i < adjacentTile.Value.Count; i++)
-         //     {
-         //         Debug.Log(adjacentTile.Key +"  "+ adjacentTile.Value[i].x +"  "+adjacentTile.Value[i].y);
-         //     }
-         // }
-
-         LoadHeadAndTailOfSnakeByAdjacentTile();
+         MarkedIdOfTile();
      }
-
-     void LoadHeadAndTailOfSnakeByAdjacentTile()
+     //Input: adjacentTile;
+     //Output: Các tile được đánh số thứ tự (id)
+     void MarkedIdOfTile()
      {
          for (int i = 0; i < allSnakes.Count; i++)
          {
@@ -460,10 +447,9 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
                  }
              }
          }
-
          SortTileOfSnakeByTileID();
      }
-
+     // Hàm đệ quy, đánh số thứ tự cho đến hết các tile của snake
      void LoadHeadAndTileOfSnake(Snake snake, int tileID, int index)
      {
          tileID++;
@@ -489,7 +475,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
              }
          }
      }
-
+    // Input: allSnakes
+    // Output: Sắp sếp lại tile trong mỗi snake theo số thứ tự
      void SortTileOfSnakeByTileID()
      {
          for (int i = 0; i < allSnakes.Count(); i++)
@@ -513,6 +500,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
 
      private int snakeIndex = 100;
      private bool isSnakeHead = true;
+     // Input: Mouse position
+     // Ouput: Kiểm tra chuột có đang trỏ vào snake nào không, nếu có lưu lại vị trí của snake trong list allSnakes 
      void ChoseSnakeRayCast()
      {
          Vector3 mousePos = Input.mousePosition;
@@ -550,6 +539,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
          }
      }
 
+     // Input: vị trí của snake trong list allSnakes, tile đang được chọn
+     // Output: Kiểm tra tile được chọn là head hay tail, lưu vào bool isSnakeHead
      void CheckSnakeIsChosen(int index , GameObject ob)
      {
          CheckSnakeTileIsChosen_HeadOrTail(allSnakes[index], ob);
@@ -585,6 +576,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
      private const float mMinSwipeDist = 80.0f;
 
      private Vector2 mStartPosition;
+     // Input: MousePosition
+     // Output: Kiêm tra đang kéo snake theo hướng nào
      void SnakeDrag()
      {
          if (Input.GetMouseButtonDown(0))
@@ -664,7 +657,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
              SnakeMove(1, 0);
          }
      }
-
+     // Input: x tăng thêm và y tăng thêm
+     // Output: Di chuyển snake
      void SnakeMove(int x, int y)
      {
          int currentX;
@@ -689,7 +683,9 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
              ChangeValueOfTheMatrixAfterSnakeMove(allSnakes[snakeIndex]);
          }
      }
-
+     // Input: x tăng thêm ,y tăng thêm, x hiện tại, y hiện tại , id của snake
+     // Output: kiểm tra có di chuyển được hay không
+     //         kiểm tra nếu ô tiếp theo là lỗ thì xoá snake khỏi mảng
      bool CheckCanMove(int x, int y, int currentX, int currentY, int snakeID)
      {
          int targetX = currentX + x;
@@ -717,58 +713,62 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
          }
          return false;
      }
+     // Input: snake
+     // Output: Đổi màu thành trắng và đổi giá trị của grid = 0;
      void ChangeValueOfTheMatrixBeforeSnakeMove(Snake snake)
      {
          for (int i = 0; i < snake.allTile.Count; i++)
          {
              grid[snake.allTile[i].x, snake.allTile[i].y] = 0;
-             ChangeTileColor(gridObject[snake.allTile[i].x, snake.allTile[i].y], tileColors[1], 0);
+             ChangeTileColor(gridObject[snake.allTile[i].x, snake.allTile[i].y], tileColors[1]);
          }
      }
+     // Input: snake
+     // Output: Đổi màu và đổi giá trị của grid tương ứng với các tile của snake
      void ChangeValueOfTheMatrixAfterSnakeMove(Snake snake)
      {
          for (int i = 0; i < snake.allTile.Count; i++)
          {
              grid[snake.allTile[i].x, snake.allTile[i].y] = snake.snakeID;
-             ChangeTileColor(gridObject[snake.allTile[i].x, snake.allTile[i].y], tileColors[snake.snakeID], snake.snakeID);
+             ChangeTileColor(gridObject[snake.allTile[i].x, snake.allTile[i].y], tileColors[snake.snakeID]);
          }
      }
-     void ChangeTileColor(GameObject tile, Color color, int id)
+     // Input: tile, color
+     // Output: Đổi màu của tile (Khi di chuyển)
+     void ChangeTileColor(GameObject tile, Color color)
      {
          tile.transform.GetChild(0).gameObject.SetActive(false);
          tile.GetComponent<SpriteRenderer>().color = color;
      }
+     // Input: Click vào Export trên màn hình
+     // Output: tên của file được lưu dựa theo thời gian lưu, gọi hàm SaveArrayToFile
      public void ExportBtnClick()
      {
-         // Đường dẫn tệp văn bản để lưu trữ
          var time = DateTime.Now.ToString("dd_MM_yyyy (HH:mm:ss)");
          string filePath = "Assets/ScreenCapture/arrayData" +time+ ".txt";
-
-         // Ghi mảng vào tệp văn bản
+         
          SaveArrayToFile(filePath, grid);
 
          Debug.Log("Dữ liệu đã được lưu vào tệp văn bản.");
      }
+     // Input: đường dẫn tới thư mục được sẽ lưu file txt, grid
+     // Output: Chuyển đổi grid thành file txt và lưu vào folder ScreenCapture
      void SaveArrayToFile(string filePath, int[,] arrayToSave)
      {
-         // Mở tệp để ghi
          using (StreamWriter writer = new StreamWriter(filePath))
          {
-             // Duyệt qua từng phần tử trong mảng và ghi vào tệp
              for (int i = 0; i < arrayToSave.GetLength(0); i++)
              {
                  for (int j = 0; j < arrayToSave.GetLength(1); j++)
                  {
                      writer.Write(arrayToSave[i, j]);
-
-                     // Thêm dấu phẩy giữa các phần tử
+                     
                      if (j < arrayToSave.GetLength(1) - 1)
                      {
                          writer.Write(",");
                      }
                  }
-
-                 // Xuống dòng sau mỗi hàng
+                 
                  writer.WriteLine();
              }
          }
@@ -776,7 +776,9 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
 
      [Header("Copy đường dẫn của file text và dán vào đây")]
      public string filePath;
-
+     
+     // Input: Click vào button Import trên màn hình, đường dẫn file text
+     // Output: Kiểm tra đường dẫn có tồm tại hay không, nếu có Lần lượt gọi các hàm LoadArrayFromFile, LoadGridVisual
      public void LoadFileTextToGrid()
      {
          if (File.Exists(filePath))
@@ -789,32 +791,35 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
              Debug.LogError("Không tìm thấy tệp văn bản.");
          }
      }
+     // Input: Đường dẫn file text
+     // Output: Đọc file text, load các giá trị vào mảng 2 chiều gird
      private int[,] LoadArrayFromFile(string filePath)
      {
          string[] lines = File.ReadAllLines(filePath);
 
-         // Số hàng và cột dựa trên kích thước của mảng trong tệp
+         
          int numRows = lines.Length;
          int numCols = lines[0].Split(',').Length;
 
-         // Tạo mảng để lưu dữ liệu từ tệp
+     
          grid = new int[numRows, numCols];
 
-         // Duyệt qua từng dòng và cột để lấy dữ liệu từ tệp
+         
          for (int i = 0; i < numRows; i++)
          {
              string[] values = lines[i].Split(',');
 
              for (int j = 0; j < numCols; j++)
              {
-                 // Chuyển đổi từ chuỗi sang số nguyên và gán vào mảng
+                 
                  int.TryParse(values[j], out grid[i, j]);
              }
          }
 
          return grid;
      }
-
+    // Input: Gird
+    // Output: Generate tile ra màn hình
      public void LoadGridVisual()
      {
          if (transform.childCount != 0)
@@ -854,6 +859,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
 
          ChangCameraView();      
      }
+     // Input: tile, isHole(là tile bình thường hay hole), id của tile
+     // Output: Đổi màu theo id, đổi hình dạng của tile theo isHole
      void ChangeTileColor(GameObject tile, bool isHole, int id)
      {
          // hoan doi id cua mau den va mau trang
@@ -879,7 +886,45 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
          }
         
      }
-     
+     // Debug giá trị của grid(không quan trọng)
+      void DeBugNumberAray(int[,] number)
+        {
+            // Debug.Log("       " + number[0, 0] + "       " + number[0, 1] + "       " + number[0, 2] + "       " + number[0, 3] + "       " + number[0, 4]);
+            // Debug.Log("       " + number[1, 0] + "       " + number[1, 1] + "       " + number[1, 2] + "       " + number[1, 3] + "       " + number[1, 4]);
+            // Debug.Log("       " + number[2, 0] + "       " + number[2, 1] + "       " + number[2, 2] + "       " + number[2, 3] + "       " + number[2, 4]);
+            // Debug.Log("       " + number[3, 0] + "       " + number[3, 1] + "       " + number[3, 2] + "       " + number[3, 3] + "       " + number[3, 4]);
+            // Debug.Log("       " + number[4, 0] + "       " + number[4, 1] + "       " + number[4, 2] + "       " + number[4, 3] + "       " + number[4, 4]);
+            Debug.Log("       " + number[0, 0] + "       " + number[0, 1] + "       " + number[0, 2] + "       " +
+                      number[0, 3] + "       " + number[0, 4] + "       " + number[0, 5] + "       " + number[0, 6] +
+                      "       " + number[0, 7] + "       " + number[0, 8] + "       " + number[0, 9]);
+            Debug.Log("       " + number[1, 0] + "       " + number[1, 1] + "       " + number[1, 2] + "       " +
+                      number[1, 3] + "       " + number[1, 4] + "       " + number[1, 5] + "       " + number[1, 6] +
+                      "       " + number[1, 7] + "       " + number[1, 8] + "       " + number[1, 9]);
+            Debug.Log("       " + number[2, 0] + "       " + number[2, 1] + "       " + number[2, 2] + "       " +
+                      number[2, 3] + "       " + number[2, 4] + "       " + number[2, 5] + "       " + number[2, 6] +
+                      "       " + number[2, 7] + "       " + number[2, 8] + "       " + number[2, 9]);
+            Debug.Log("       " + number[3, 0] + "       " + number[3, 1] + "       " + number[3, 2] + "       " +
+                      number[3, 3] + "       " + number[3, 4] + "       " + number[3, 5] + "       " + number[3, 6] +
+                      "       " + number[3, 7] + "       " + number[3, 8] + "       " + number[3, 9]);
+            Debug.Log("       " + number[4, 0] + "       " + number[4, 1] + "       " + number[4, 2] + "       " +
+                      number[4, 3] + "       " + number[4, 4] + "       " + number[4, 5] + "       " + number[4, 6] +
+                      "       " + number[4, 7] + "       " + number[4, 8] + "       " + number[4, 9]);
+            Debug.Log("       " + number[5, 0] + "       " + number[5, 1] + "       " + number[5, 2] + "       " +
+                      number[5, 3] + "       " + number[5, 4] + "       " + number[5, 5] + "       " + number[5, 6] +
+                      "       " + number[5, 7] + "       " + number[5, 8] + "       " + number[5, 9]);
+            Debug.Log("       " + number[6, 0] + "       " + number[6, 1] + "       " + number[6, 2] + "       " +
+                      number[6, 3] + "       " + number[6, 4] + "       " + number[6, 5] + "       " + number[6, 6] +
+                      "       " + number[6, 7] + "       " + number[6, 8] + "       " + number[6, 9]);
+            Debug.Log("       " + number[7, 0] + "       " + number[7, 1] + "       " + number[7, 2] + "       " +
+                      number[7, 3] + "       " + number[7, 4] + "       " + number[7, 5] + "       " + number[7, 6] +
+                      "       " + number[7, 7] + "       " + number[7, 8] + "       " + number[7, 9]);
+            Debug.Log("       " + number[8, 0] + "       " + number[8, 1] + "       " + number[8, 2] + "       " +
+                      number[8, 3] + "       " + number[8, 4] + "       " + number[8, 5] + "       " + number[8, 6] +
+                      "       " + number[8, 7] + "       " + number[8, 8] + "       " + number[8, 9]);
+            Debug.Log("       " + number[9, 0] + "       " + number[9, 1] + "       " + number[9, 2] + "       " +
+                      number[9, 3] + "       " + number[9, 4] + "       " + number[9, 5] + "       " + number[9, 6] +
+                      "       " + number[9, 7] + "       " + number[9, 8] + "       " + number[9, 9]);
+        }
 
 }
 //new Vector3( column,  currentRows - row, 0)

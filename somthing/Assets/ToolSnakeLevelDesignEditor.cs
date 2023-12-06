@@ -13,8 +13,8 @@ using Object = UnityEngine.Object;
 
 public class ToolSnakeLevelDesignEditor : MonoBehaviour
 {
-    public int rows;
-    public int cols;
+    private int rows;
+    private int cols;
     public GameObject tileSprite;
     private Camera cam;
     
@@ -24,6 +24,7 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
     public List<Color> tileColors;
     public GameObject tileButtonPanel;
     public GameObject holeButtonPanel;
+    
     private int[,] grid;
     private GameObject[,] gridObject;
     
@@ -33,7 +34,10 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
     private Image currentButtonSelect;
     
     public List<Color> Colors;
-    public bool isPlayMode = false;
+    private bool isPlayMode = false;
+    
+    public TMP_InputField WidthInputField;
+    public TMP_InputField HeightInputField;
     
     [Header("Copy đường dẫn của file text và dán vào đây")]
     public string filePath;
@@ -230,8 +234,7 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
         }
     }
     
-    public TMP_InputField WidthInputField;
-    public TMP_InputField HeightInputField;
+   
     // Input: WidthInputField, HeightInputField (nhập số trên màn hình)
     // Output: Click ExportSize để gọi hàm GenerateTile
     public void GenerateTileButton()

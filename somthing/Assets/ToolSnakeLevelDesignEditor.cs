@@ -26,11 +26,94 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
     public GameObject holeButtonPanel;
     private int[,] grid;
     private GameObject[,] gridObject;
+    
+    private Color colorChange;
+    private bool isHole;
+    private int id;
+    private Image currentButtonSelect;
+    
+    public List<Color> Colors;
+    public bool isPlayMode = false;
+    
+    [Header("Copy đường dẫn của file text và dán vào đây")]
+    public string filePath;
 
     private void Start()
     {
          cam = Camera.main;
          ChangeButtonColor();
+         GenerateTileOnStart();
+    }
+    // Input: Click On Tile Or Hole Button
+    // Output: Save button color to "colorChange", button id to "id", button status(normal tile , hold) to "isHole", hightlight slected button
+    public void TileAndHoleButtonClick()
+    {
+        if (currentButtonSelect != null)
+        {
+            currentButtonSelect.color = Colors[0];
+        }
+        
+        GameObject clickButton = EventSystem.current.currentSelectedGameObject;
+        currentButtonSelect = clickButton.GetComponent<Image>();
+        currentButtonSelect.color = Colors[1];
+        colorChange = clickButton.transform.GetChild(0).GetComponent<Image>().color;
+        
+        id = tileColors.IndexOf(colorChange);
+        isHole = clickButton.name[0] == 'H';
+    }
+    private void Update()
+    {
+        if (!isPlayMode)
+        {
+            DrawTile();
+        }
+        else
+        {
+            ChoseSnake();
+            SnakeDrag();
+        }
+        
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            // Không quan trọng
+            DeBugNumberAray(grid);
+        }
+    }
+    // Turn On PlayMode;
+    public void PlayModeOn_Button()
+    {
+        isPlayMode = true;
+        PlayMode();
+    }
+    // Turn On EditMode;
+    public void EditModeOn_Button()
+    {
+        isPlayMode = false;
+    }
+    // Input: Click on Export button
+    // Output: Create filePath on ScreenCapture folder, call function SaveArrayToFile
+    public void ExportBtnClick()
+    {
+        var time = DateTime.Now.ToString("dd_MM_yyyy (HH:mm:ss)");
+        string filePath = "Assets/ScreenCapture/arrayData" +time+ ".txt";
+         
+        SaveArrayToFile(filePath, grid);
+
+        Debug.Log("Dữ liệu đã được lưu vào tệp văn bản.");
+    }
+    // Input: Click on Import, "filePath"
+    // Output: Check if the path exists or not,  if path exists, call function LoadArrayFromFile, LoadGridVisual
+    public void LoadFileTextToGrid()
+    {
+        if (File.Exists(filePath))
+        {
+            grid = LoadArrayFromFile(filePath);
+            LoadGridVisual();
+        }
+        else
+        {
+            Debug.LogError("Không tìm thấy tệp văn bản.");
+        }
     }
     // Input: tileColors, tileButtonPanel, holeButtonPanel
     // Output: Đổi màu của button
@@ -64,79 +147,61 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
         }
     }
 
-     private GameObject objInRay1;
-     private GameObject objInRay2;
-     public List<Color> Colors;
-     public bool isPlayMode = false;
-  
-    private void Update()
+    
+   
+    // Input: Mouse position
+    // Output: call function ChangeTileColor
+    private bool onMouseDrag = false;
+    private GameObject lastHighlightedObject;
+    void DrawTile()
     {
-        if (!isPlayMode)
-        {
-            ChoseTileUseRayCast();
-        }
-        else
-        {
-            ChoseSnakeRayCast();
-            SnakeDrag();
-        }
-        
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            // Không quan trọng
-            DeBugNumberAray(grid);
-        }
-    }
-    // Input: mouse position, button (button color, loại button(tile, hole), id của button )
-    // Output: gọi hàm ChangeTileColor
-    void ChoseTileUseRayCast()
-    {
-        Vector3 mousePos = Input.mousePosition;
-        mousePos.z = 10f;
-        mousePos = cam.ScreenToWorldPoint(mousePos);
-        
-        Debug.DrawRay(cam.transform.position, mousePos - cam.transform.position, Color.blue);
-        
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        bool rayCastDown = Physics.Raycast(ray, out hit, 100);
-        if (rayCastDown)
-        {
-            objInRay1 = hit.transform.gameObject;
-            objInRay1.transform.GetChild(1).gameObject.SetActive(true);
-            if (objInRay1 != objInRay2)
-            {
-                if (objInRay2 != null)
-                {
-                    objInRay2.transform.GetChild(1).gameObject.SetActive(false);
-                }
 
-                objInRay2 = objInRay1;
+        if (!Physics.Raycast(ray, out hit, 100))
+        {
+            ClearHighlightedObject();
+            return; // để kết thúc ngay lập tức hàm khi raycast không va chạm
+        }
+
+        GameObject currentObject = hit.transform.gameObject;
+
+        if (currentObject != lastHighlightedObject)
+        {
+            ClearHighlightedObject();
+            currentObject.transform.GetChild(1).gameObject.SetActive(true);
+            lastHighlightedObject = currentObject;
+        }
+
+        if (Input.GetMouseButton(0))
+        {
+            onMouseDrag = true;
+            if (onMouseDrag)
+            {
+                ChangeTileColor(currentObject, colorChange, isHole, id);
             }
         }
         else
         {
-            if (objInRay1 != null)
-            {
-                objInRay1.transform.GetChild(1).gameObject.SetActive(false);
-            }
-            
+            onMouseDrag = false;
         }
+    }
 
-        if (Input.GetMouseButtonDown(0) && rayCastDown)
+    void ClearHighlightedObject()
+    {
+        if (lastHighlightedObject != null)
         {
-            if (colorChange != null)
-            {
-                ChangeTileColor(objInRay1, colorChange, isHole,id);
-            }
+            lastHighlightedObject.transform.GetChild(1).gameObject.SetActive(false);
+            lastHighlightedObject = null;
         }
     }
     
-    //Input: Tile đã chọn, button (button color, loại button(tile, hole), id của button )
-    //Output: Đổi màu của tile, đổi dạng của tile (tile bình thường hoặc hole)
+    
+    //Input: Tile selected, "colorChange", "isHole", "id"
+    //Output: Change tile color, change value on "grid", show hole if tile is Hole
     void ChangeTileColor(GameObject tile, Color color, bool isHole, int id)
     {
-        // hoan doi id cua mau den va mau trang
+        // Hoán đổi giá trị id giữa màu đen và màu trắng
         if (id == 1)
         {
             id = 0;
@@ -145,21 +210,26 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
         {
             id = 1;
         }
+
+        Transform tileTransform = tile.transform;
+        Transform childTransform = tileTransform.GetChild(0).gameObject.transform.GetChild(0);
+
         if (isHole)
         {
-            tile.transform.GetChild(0).gameObject.SetActive(true);
-            tile.transform.GetChild(0).gameObject.transform.GetChild(0).GetComponent<SpriteRenderer>().color = color;
-            grid[(int)(currentRows - tile.transform.position.y), (int)tile.transform.position.x] = 10 + id;
+            // Hiển thị đối tượng hố và thiết lập màu cho nó
+            tileTransform.GetChild(0).gameObject.SetActive(true);
+            childTransform.GetComponent<SpriteRenderer>().color = color;
+            grid[(int)(currentRows - tileTransform.position.y), (int)tileTransform.position.x] = 100 + id;
         }
         else
         {
-            tile.transform.GetChild(0).gameObject.SetActive(false);
+            // Ẩn đối tượng hố và thiết lập màu cho ô đất
+            tileTransform.GetChild(0).gameObject.SetActive(false);
             tile.GetComponent<SpriteRenderer>().color = color;
-            grid[(int)(currentRows - tile.transform.position.y), (int)tile.transform.position.x] =id;
+            grid[(int)(currentRows - tileTransform.position.y), (int)tileTransform.position.x] = id;
         }
-        
     }
-
+    
     public TMP_InputField WidthInputField;
     public TMP_InputField HeightInputField;
     // Input: WidthInputField, HeightInputField (nhập số trên màn hình)
@@ -169,6 +239,11 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
         rows = int.Parse(WidthInputField.text);
         cols = int.Parse(HeightInputField.text);
         GenerateTile();
+    }
+
+    public void GenerateTileOnStart()
+    {
+        GenerateTileButton();
     }
     // Input: WidthInputField, HeightInputField
     // Output: Generate ra các tile
@@ -187,16 +262,19 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
             currentRows = rows;
             currentColumns = cols;
             gridObject = new GameObject[currentRows, currentColumns];
+            grid = new int[currentRows, currentColumns];
             for (int i = 0; i < currentRows; i++)
             {
                 for (int j = 0; j < currentColumns; j++)
                 {
+                    grid[i, j] = 1; // Set Default Tile is Block Tile
+                    
                     var tile = Instantiate(tileSprite, new Vector3( j,  currentRows - i, 0), quaternion.identity);
                     gridObject[i, j] = tile;
                     tile.transform.SetParent(gameObject.transform);
                 }
             }
-            grid = new int[currentRows, currentColumns];
+            
         }
 
         ChangCameraView();
@@ -220,63 +298,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
         cam.transform.position = new Vector3((minSize / 10) - 0.5f, (minSize+1) / 2, -10);
         cam.orthographicSize = (minSize+1)/2;
     }
-
-   
-
-    
-
-    private Color colorChange;
-    private bool isHole;
-    private int id;
-    private Image currentButtonSelect;
     
     
-    // Input: Click vào button
-    // Output: Lưu thông tin của button (button color, loại button(tile, hole), id của button ).
-    //         Button đang được chọn sẽ được hightlight, lúc này khi click vào các tile trên màn hình sẽ đổi màu tương ứng với thông tin của button
-    public void TileAndHoleButtonClick()
-    {
-        if (currentButtonSelect != null)
-        {
-            currentButtonSelect.color = Colors[0];
-        }
-        
-        GameObject ClickButton = EventSystem.current.currentSelectedGameObject;
-        ClickButton.GetComponent<Image>().color = Colors[1];
-        currentButtonSelect = ClickButton.GetComponent<Image>();
-        colorChange = ClickButton.transform.GetChild(0).GetComponent<Image>().color;
-        for (int i = 0; i < tileColors.Count; i++)
-        {
-            if (colorChange == tileColors[i])
-            {
-                id = i;
-                break;
-            }
-        }
-        
-        if (ClickButton.name[0] == 'H')
-        {
-            isHole = true;
-        }
-        else
-        {
-            isHole = false;
-        }
-
-       
-    }
-    
-    // Bật PlayMode;
-     public void PlayModeOn_Button()
-     {
-         isPlayMode = true;
-         PlayMode();
-     }
-     // Bật EditMode;
-     public void EditModeOn_Button()
-     {
-         isPlayMode = false;
-     }
      // This is code PlayMode
      
      [Serializable]
@@ -311,35 +334,23 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
         // Output: Thay đổi các giá trị từng tile của snake
          public void SnakeMove(bool head, int x, int y, GameObject gameobject)
          {
-             if (head)
-             {
-                 for (int i = 0; i < allTile.Count; i++)
-                 {
-                     var tempx = allTile[i].x;
-                     var tempy = allTile[i].y;
-                     var tempob = allTile[i].ob;
-                     var id = allTile[i].tileID;
-                     allTile[i] = new Tile(x, y, gameobject, id);
-                     x = tempx;
-                     y = tempy;
-                     gameobject = tempob;
-                 }
-             }
-             else
-             {
-                 for (int i = allTile.Count - 1; i >= 0; i--)
-                 {
-                     var tempx = allTile[i].x;
-                     var tempy = allTile[i].y;
-                     var tempob = allTile[i].ob;
-                     var id = allTile[i].tileID;
-                     allTile[i] = new Tile(x, y, gameobject, id);
-                     x = tempx;
-                     y = tempy;
-                     gameobject = tempob;
-                 }
-             }
+             int startIndex = (head) ? 0 : allTile.Count - 1;
+             int endIndex = (head) ? allTile.Count : -1;
+             int step = (head) ? 1 : -1;
 
+             for (int i = startIndex; i != endIndex; i += step)
+             {
+                 var tempx = allTile[i].x;
+                 var tempy = allTile[i].y;
+                 var tempob = allTile[i].ob;
+                 var id = allTile[i].tileID;
+
+                 allTile[i] = new Tile(x, y, gameobject, id);
+
+                 x = tempx;
+                 y = tempy;
+                 gameobject = tempob;
+             }
          }
      }
      private Dictionary<int, Snake> allIdOfSnakes = new Dictionary<int, Snake>();
@@ -359,25 +370,20 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
          {
              for (int column = 0; column < currentColumns; column++)
              {
-                 if (grid[row, column] != 0 && grid[row, column] != 1)
+                 int currentGridValue = grid[row, column];
+
+                 if (currentGridValue != 0 && currentGridValue != 1 && currentGridValue.ToString().Length != 3)
                  {
-                     int index = grid[row, column];
-                     
-                     if (allIdOfSnakes.ContainsKey(index))
+                     if (allIdOfSnakes.ContainsKey(currentGridValue))
                      {
-                         //new Vector3( column,  currentRows - row, 0)
                          var ob = gridObject[row, column];
-                         allIdOfSnakes[index].allTile.Add(new Tile(row, column, ob,100));
+                         allIdOfSnakes[currentGridValue].allTile.Add(new Tile(row, column, ob, 100));
                      }
                      else
                      {
-                         List<Tile> allTile = new List<Tile>();
-                         Dictionary<int,List<Tile>> adjacentTile = new Dictionary<int,List<Tile>>();
-                         var ob = gridObject[row, column];
-                         var tile = new Tile(row, column, ob,100);
-                         allTile.Add(tile);
-                        
-                         allIdOfSnakes[index] = new Snake(allTile,adjacentTile,index);
+                         List<Tile> allTile = new List<Tile> { new Tile(row, column, gridObject[row, column], 100) };
+                         Dictionary<int, List<Tile>> adjacentTile = new Dictionary<int, List<Tile>>();
+                         allIdOfSnakes[currentGridValue] = new Snake(allTile, adjacentTile, currentGridValue);
                      }
                  }
              }
@@ -400,32 +406,42 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
      //Output: với mỗi snake trong allSnakes, với mỗi tile trong snake kiểm tra các tile liền kề và thêm vào adjacentTile
      void LoadAdjacentTileOfEachTile()
      {
+         // Cho từng con rắn trong danh sách
          for (int i = 0; i < allSnakes.Count; i++)
          {
-             for (int j = 0; j < allSnakes[i].allTile.Count; j++)
+             // Lấy thông tin của con rắn hiện tại
+             var snake = allSnakes[i];
+             var allTile = snake.allTile;
+             var adjacentTile = snake.adjacentTile;
+             
+             // Duyệt qua tất cả các ô của con rắn
+             for (int j = 0; j < allTile.Count; j++)
              {
-                 var startTile = allSnakes[i].allTile[j];
-                 for (int k = 0; k < allSnakes[i].allTile.Count; k++)
+                 // Lấy thông tin của ô bắt đầu
+                 var startTile = allTile[j];
+    
+                 // Duyệt qua tất cả các ô khác trong con rắn
+                 for (int k = 0; k < allTile.Count; k++)
                  {
-                    var endTile =  allSnakes[i].allTile[k];
-                    var distance = Math.Sqrt(Math.Pow(startTile.x - endTile.x, 2) + Math.Pow(startTile.y - endTile.y, 2));
-                    
-                    if (distance == 1)
-                    {
-                        if (allSnakes[i].adjacentTile.ContainsKey(j))
-                        {
-                            allSnakes[i].adjacentTile[j].Add(endTile);
-                        }
-                        else
-                        {
-                            List<Tile> tiles = new List<Tile>();
-                            tiles.Add(endTile);
-                            allSnakes[i].adjacentTile[j] = tiles;
-                        }
-                        //Debug.Log(startTile.x + "  " + startTile.y +"  "+endTile.x + "  " + endTile.y +"  "+ distance);
-                    }
+                     // Bỏ qua ô hiện tại
+                     if (j != k)
+                     {
+                         // Lấy thông tin của ô kết thúc
+                         var endTile = allTile[k];
+
+                         // Tính khoảng cách giữa hai ô
+                         var distance = Math.Sqrt(Math.Pow(startTile.x - endTile.x, 2) + Math.Pow(startTile.y - endTile.y, 2));
+
+                         // Nếu khoảng cách bằng 1, đánh dấu ô kết thúc là ô lân cận của ô bắt đầu
+                         if (distance == 1)
+                         {
+                             if (!adjacentTile.TryAdd(j, new List<Tile> { endTile }))
+                             {
+                                 adjacentTile[j].Add(endTile);
+                             }
+                         }
+                     }
                  }
-              
              }
          }
          MarkedIdOfTile();
@@ -436,13 +452,20 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
      {
          for (int i = 0; i < allSnakes.Count; i++)
          {
-             foreach (var adjacentTile in  allSnakes[i].adjacentTile)
+             // Lấy thông tin của con rắn hiện tại
+             var snake = allSnakes[i];
+             var allTile = snake.allTile;
+             var adjacentTile = snake.adjacentTile;
+
+             // Duyệt qua tất cả các ô lân cận của từng ô trong con rắn
+             foreach (var pair in adjacentTile)
              {
-                 if (adjacentTile.Value.Count == 1)
+                 // Nếu ô chỉ có một ô lân cận, đánh dấu ô hiện tại có ID là 0
+                 if (pair.Value.Count == 1)
                  {
-                     var tempTile = allSnakes[i].allTile[adjacentTile.Key];
-                     allSnakes[i].allTile[adjacentTile.Key] = new Tile(tempTile.x, tempTile.y, tempTile.ob, 0);
-                     LoadHeadAndTileOfSnake(allSnakes[i], 0, adjacentTile.Key);
+                     var tempTile = allTile[pair.Key];
+                     allTile[pair.Key] = new Tile(tempTile.x, tempTile.y, tempTile.ob, 0);
+                     LoadHeadAndTileOfSnake(snake, 0, pair.Key);
                      break;
                  }
              }
@@ -453,21 +476,26 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
      void LoadHeadAndTileOfSnake(Snake snake, int tileID, int index)
      {
          tileID++;
+
+         // Nếu chưa đánh dấu hết các ô trong con rắn
          if (tileID < snake.allTile.Count)
          {
-             foreach (var adT in  snake.adjacentTile)
+             // Duyệt qua tất cả các ô lân cận của từng ô trong con rắn
+             foreach (var pair in snake.adjacentTile)
              {
-                 for (int i = 0; i < adT.Value.Count; i++)
+                 // Duyệt qua tất cả các ô lân cận
+                 for (int i = 0; i < pair.Value.Count; i++)
                  {
-                     if (adT.Value[i].x == snake.allTile[index].x &&
-                         adT.Value[i].y == snake.allTile[index].y)
+                     // Nếu tìm thấy ô lân cận có tọa độ giống với ô hiện tại
+                     if (pair.Value[i].x == snake.allTile[index].x && pair.Value[i].y == snake.allTile[index].y)
                      {
-                         
-                         var tempTile = snake.allTile[adT.Key];
+                         var tempTile = snake.allTile[pair.Key];
+
+                         // Nếu ô lân cận có ID là 100, đánh dấu ID của ô lân cận và tiếp tục đệ quy
                          if (tempTile.tileID == 100)
                          {
-                             snake.allTile[adT.Key] = new Tile(tempTile.x, tempTile.y, tempTile.ob, tileID);
-                             LoadHeadAndTileOfSnake(snake, tileID, adT.Key);
+                             snake.allTile[pair.Key] = new Tile(tempTile.x, tempTile.y, tempTile.ob, tileID);
+                             LoadHeadAndTileOfSnake(snake, tileID, pair.Key);
                              break;
                          }
                      }
@@ -479,22 +507,16 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
     // Output: Sắp sếp lại tile trong mỗi snake theo số thứ tự
      void SortTileOfSnakeByTileID()
      {
+         // Duyệt qua tất cả các con rắn trong danh sách
          for (int i = 0; i < allSnakes.Count(); i++)
          {
-             List<Tile> temp = new  List<Tile>();
+             var snake = allSnakes[i];
 
-             var enum1 = from aTile in allSnakes[i].allTile
-                 orderby aTile.tileID
-                 select aTile;
-            
-             foreach (var e in enum1)
-             {
-                 temp.Add(e);
-             }
+             // Sắp xếp các ô trong con rắn theo ID
+             var sortedTiles = snake.allTile.OrderBy(t => t.tileID).ToList();
 
-             var adT = allSnakes[i].adjacentTile;
-             var id = allSnakes[i].snakeID;
-             allSnakes[i] = new Snake(temp, adT,id);
+             // Gán lại danh sách các ô đã sắp xếp cho con rắn
+             allSnakes[i] = new Snake(sortedTiles, snake.adjacentTile, snake.snakeID);
          }
      }
 
@@ -502,14 +524,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
      private bool isSnakeHead = true;
      // Input: Mouse position
      // Ouput: Kiểm tra chuột có đang trỏ vào snake nào không, nếu có lưu lại vị trí của snake trong list allSnakes 
-     void ChoseSnakeRayCast()
+     void ChoseSnake()
      {
-         Vector3 mousePos = Input.mousePosition;
-         mousePos.z = 10f;
-         mousePos = cam.ScreenToWorldPoint(mousePos);
-        
-         Debug.DrawRay(cam.transform.position, mousePos - cam.transform.position, Color.blue);
-        
          Ray ray = cam.ScreenPointToRay(Input.mousePosition);
          RaycastHit hit;
          bool rayCastDown = Physics.Raycast(ray, out hit, 100);
@@ -517,25 +533,19 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
          if (Input.GetMouseButtonDown(0) && rayCastDown)
          {
              var color = hit.transform.gameObject.GetComponent<SpriteRenderer>().color;
-             for (int i = 0; i < tileColors.Count; i++)
-             {
-                 if (color == tileColors[i])
-                 {
-                     for (int j = 0; j < allSnakes.Count; j++)
-                     {
-                         if (allSnakes[j].snakeID == i)
-                         {
-                             snakeIndex = j;
-                         }
-                     }
-                     CheckSnakeIsChosen(snakeIndex, hit.transform.gameObject);
-                 }
-             }
+             
+             int index = tileColors.FindIndex(c => c == color); 
+             
+             var snake = allSnakes.FirstOrDefault(s => s.snakeID == index);
+             
+             snakeIndex = allSnakes.IndexOf(snake);
+             
+             CheckSnakeIsChosen(snakeIndex, hit.transform.gameObject);
          }
 
          if (Input.GetMouseButtonUp(0))
          {
-             snakeIndex = 100;
+             snakeIndex = 1000;
          }
      }
 
@@ -548,6 +558,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
 
      void CheckSnakeTileIsChosen_HeadOrTail(Snake snake, GameObject ob)
      {
+         int lastIndex = snake.allTile.Count - 1;
+
          //new Vector3( column,  currentRows - row, 0)
          for (int i = 0; i < snake.allTile.Count; i++)
          {
@@ -558,7 +570,7 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
                      Debug.Log("Head");
                      isSnakeHead = true;
                  }
-                 else if (snake.allTile[i].tileID == snake.allTile.Count-1)
+                 else if (snake.allTile[i].tileID == lastIndex)
                  {
                      Debug.Log("Tail");
                      isSnakeHead = false;
@@ -624,7 +636,7 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
      void OnSwipeRight()
      {
          //Debug.Log("Right");
-         if (snakeIndex != 100)
+         if (snakeIndex != 1000)
          {
              SnakeMove(0, 1);
          }
@@ -634,7 +646,7 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
      void OnSwipeLeft()
      {
          //Debug.Log("Left");
-         if (snakeIndex != 100)
+         if (snakeIndex != 1000)
          {
              SnakeMove(0, -1);
          }
@@ -643,7 +655,7 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
      void OnSwipeTop()
      {
          //Debug.Log("Top");
-         if (snakeIndex != 100)
+         if (snakeIndex != 1000)
          {
              SnakeMove(-1, 0);
          }
@@ -652,7 +664,7 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
      void OnSwipeBottom()
      {
          //Debug.Log("Bottom");
-         if (snakeIndex != 100)
+         if (snakeIndex != 1000)
          {
              SnakeMove(1, 0);
          }
@@ -700,9 +712,11 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
              return true;
          }
 
-         if (grid[targetX, targetY].ToString().Length == 2)
+         if (grid[targetX, targetY].ToString().Length == 3)
          {
-             if (grid[targetX, targetY].ToString()[1].ToString() == snakeID.ToString())
+             var num_1 = Int32.Parse(grid[targetX, targetY].ToString()[1].ToString());
+             var num_2 = Int32.Parse(grid[targetX, targetY].ToString()[2].ToString());
+             if ( (num_1*10 + num_2) == snakeID)
              {
                  Debug.Log("SnakeInHole");
                  ChangeValueOfTheMatrixBeforeSnakeMove(allSnakes[snakeIndex]);
@@ -740,17 +754,7 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
          tile.transform.GetChild(0).gameObject.SetActive(false);
          tile.GetComponent<SpriteRenderer>().color = color;
      }
-     // Input: Click vào Export trên màn hình
-     // Output: tên của file được lưu dựa theo thời gian lưu, gọi hàm SaveArrayToFile
-     public void ExportBtnClick()
-     {
-         var time = DateTime.Now.ToString("dd_MM_yyyy (HH:mm:ss)");
-         string filePath = "Assets/ScreenCapture/arrayData" +time+ ".txt";
-         
-         SaveArrayToFile(filePath, grid);
-
-         Debug.Log("Dữ liệu đã được lưu vào tệp văn bản.");
-     }
+     
      // Input: đường dẫn tới thư mục được sẽ lưu file txt, grid
      // Output: Chuyển đổi grid thành file txt và lưu vào folder ScreenCapture
      void SaveArrayToFile(string filePath, int[,] arrayToSave)
@@ -774,23 +778,9 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
          }
      }
 
-     [Header("Copy đường dẫn của file text và dán vào đây")]
-     public string filePath;
      
-     // Input: Click vào button Import trên màn hình, đường dẫn file text
-     // Output: Kiểm tra đường dẫn có tồm tại hay không, nếu có Lần lượt gọi các hàm LoadArrayFromFile, LoadGridVisual
-     public void LoadFileTextToGrid()
-     {
-         if (File.Exists(filePath))
-         {
-             grid = LoadArrayFromFile(filePath);
-             LoadGridVisual();
-         }
-         else
-         {
-             Debug.LogError("Không tìm thấy tệp văn bản.");
-         }
-     }
+     
+     
      // Input: Đường dẫn file text
      // Output: Đọc file text, load các giá trị vào mảng 2 chiều gird
      private int[,] LoadArrayFromFile(string filePath)
@@ -844,14 +834,14 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
                      gridObject[i, j] = tile;
                      tile.transform.SetParent(gameObject.transform);
                      
-                     if (grid[i, j].ToString().Length == 1)
+                     if (grid[i, j].ToString().Length != 3)
                      {
                         
                          ChangeTileColor(tile, false, grid[i,j]);
                      }
                      else
                      {
-                         ChangeTileColor(tile, true, Int32.Parse(grid[i,j].ToString()[1].ToString()));
+                         ChangeTileColor(tile, true, Int32.Parse(grid[i,j].ToString()[1].ToString()) * 10 + Int32.Parse(grid[i,j].ToString()[2].ToString()));
                      }
                  }
              }

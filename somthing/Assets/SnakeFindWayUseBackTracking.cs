@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using Random = System.Random;
 
@@ -12,11 +13,11 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
     private int[,] grid = {
      {1, 1 ,  1, 1, 1, 1, 1, 1,  1 , 1},
      {1, 1 ,  1, 1, 1, 1, 1, 1,  1 , 1},
-     {1,004, 22,23, 0,31,32,33, 005, 1},
-     {1, 1 , 21, 1, 1, 1, 1,34,  1 , 1},
-     {1, 1 ,  0, 1, 1, 1, 1, 0,  1 , 1},
-     {1, 1 , 51, 1, 1, 1, 1, 0,  1 , 1},
-     {1, 1 , 52, 1, 1, 1, 1,44,  1 , 1},
+     {1,004, 22,21, 0,31,32,33, 005, 1},
+     {1, 1 , 23, 1, 0, 1, 1,34,  1 , 1},
+     {1, 1 ,  0, 1, 0, 1, 1, 1,  1 , 1},
+     {1, 1 , 51, 1, 0, 1, 1, 1,  1 , 1},
+     {1, 1 , 52, 1, 0, 1, 1,44,  1 , 1},
      {1,003, 53,54, 0,41,42,43, 002, 1},
      {1, 1 ,  1, 1, 1, 1, 1, 1,  1 , 1},
      {1, 1 ,  1, 1, 1, 1, 1, 1,  1 , 1}
@@ -25,11 +26,13 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
     public struct Snake
     {
         public List<int[]> allTile;
+        public int[] hole;
         public int snakeID;
 
-        public Snake(List<int[]> allTile, int snakeID)
+        public Snake(List<int[]> allTile, int[] hole, int snakeID)
         {
             this.allTile = allTile;
+            this.hole = hole;
             this.snakeID = snakeID;
         }
     }
@@ -54,20 +57,28 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
         {
             for (int column = 0; column < COLS; column++)
             {
-                if (grid[row, column] != 0 && grid[row, column] != 1 && grid[row, column].ToString().Length ==2)
+                if (grid[row, column] != 0 && grid[row, column] != 1)
                 {
-                    int id = Int32.Parse(grid[row, column].ToString()[0].ToString());
-                    if (allIdOfSnakes.ContainsKey(id))
+                    string cellValue = grid[row, column].ToString();
+
+                    if (cellValue.Length == 2) // thêm list tile vào danh sách
                     {
-                        allIdOfSnakes[id ].allTile.Add(new int[] {row,column});
+                        int id = Int32.Parse(cellValue[0].ToString());
+
+                        if (!allIdOfSnakes.TryAdd(id, new Snake(new List<int[]> { new int[] { row, column } }, new int[] { }, id)))
+                        {
+                            allIdOfSnakes[id].allTile.Add(new int[] { row, column });
+                        }
                     }
-                    else
+                    else if (cellValue.Length == 3) // thêm hole vào danh sách
                     {
-                        List<int[]> allTile = new List<int[]>();
-                        var tile = new int[] { row, column };
-                        allTile.Add(tile);
-                        
-                        allIdOfSnakes[id] = new Snake(allTile,id);
+                        int id = Int32.Parse(cellValue[2].ToString());
+
+                        if (!allIdOfSnakes.TryAdd(id, new Snake(new List<int[]> { }, new int[] { row, column }, id)))
+                        {
+                            allIdOfSnakes[id].hole[0] = row;
+                            allIdOfSnakes[id].hole[1] = column;
+                        }
                     }
                 }
             }
@@ -86,33 +97,17 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
                 grid[e[0], e[1]] =  snake.Key; // delete number marked
                 temp.Add(e);
             }
-            allSnakes.Add(new Snake(temp,snake.Key));
+            allSnakes.Add(new Snake(temp,snake.Value.hole,snake.Key));
         }
       
     }
-    static List<T> ShuffleList<T>(List<T> list)
+    public bool CheckCanMoveWithThisDirections(int row, int col , Snake snake)
     {
-        Random random = new Random();
-        List<T> newList = list.ToList(); // Tạo một bản sao của danh sách gốc
-        int n = newList.Count;
-        while (n > 1)
+        if (grid[row, col] == 0 || grid[row, col] == grid[snake.hole[0], snake.hole[1]] )
         {
-            n--;
-            int k = random.Next(n + 1);
-            T value = newList[k];
-            newList[k] = newList[n];
-            newList[n] = value;
+            return true;
         }
-        return newList;
-    }
-
-    public bool CheckCanMoveWithThisDirections(int row, int col)
-    {
-        if (grid[row, col] != 0)
-        {
-            return false;
-        }
-        return true;
+        return false;
     }
     public bool CheckSnakeFindHole(int row, int col, Snake snake)
     {
@@ -120,6 +115,14 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
         {
             if (Int32.Parse(grid[row, col].ToString()[2].ToString()) == snake.snakeID)
             {
+                for (int i = 0; i < snake.allTile.Count; i++)
+                {
+                    var _row = snake.allTile[i][0];
+                    var _cols = snake.allTile[i][1];
+                    grid[_row, _cols] = 0;
+                }
+
+                grid[snake.hole[0], snake.hole[1]] = 0;
                 return true;
             }
             else
@@ -129,345 +132,253 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
         }
         return false;
     }
+
     public bool SolvePuzzle(int[,] grid)
     {
         DrawGird();
-        Thread.Sleep((int)(1000 * (1 - SPEED)));
-        
-        List<Snake> shuffledAllSnake = new List<Snake>(ShuffleList(allSnakes));
+
+        //List<Snake> shuffledAllSnake = new List<Snake>(ShuffleList(allSnakes));
+
         if (Solved(grid))
             return true;
-        foreach (var snake in shuffledAllSnake)
-        {
-            for (int i = 1; i <= 2; i++)
-            {
-                List<string> directions = new List<string>();
-                int index = 0;
-                bool head = true;
-                switch (i)
-                {
-                    case 1:
-                        index = 0;
-                        head = true;
-                        break;
-                    case 2:
-                        index = snake.allTile.Count;
-                        head = false; 
-                        break;
-                }
-                if (CheckCanMoveWithThisDirections(snake.allTile[index][0], snake.allTile[index][1] + 1))
-                {
-                    directions.Add("right");       
-                }
-                if(CheckSnakeFindHole(snake.allTile[index][0], snake.allTile[index][1] + 1,snake))
-                {
-                    allSnakes.Remove(snake);
-                    SolvePuzzle(grid);
-                    return true;
-                }
-                if (CheckCanMoveWithThisDirections(snake.allTile[index][0], snake.allTile[index][1] - 1))
-                {
-                    directions.Add("left");       
-                }
-                if(CheckSnakeFindHole(snake.allTile[index][0], snake.allTile[index][1] - 1,snake))
-                {
-                    allSnakes.Remove(snake);
-                    SolvePuzzle(grid);
-                    return true;
-                }
-                if (CheckCanMoveWithThisDirections(snake.allTile[index][0] + 1, snake.allTile[index][1]))
-                {
-                    directions.Add("down");       
-                }
-                if(CheckSnakeFindHole(snake.allTile[index][0]+1, snake.allTile[index][1],snake))
-                {
-                    allSnakes.Remove(snake);
-                    SolvePuzzle(grid);
-                    return true;
-                }
-                if (CheckCanMoveWithThisDirections(snake.allTile[index][0] - 1, snake.allTile[index][1]))
-                {
-                    directions.Add("up");       
-                }
-                if(CheckSnakeFindHole(snake.allTile[index][0] -1, snake.allTile[index][1],snake))
-                {
-                    allSnakes.Remove(snake);
-                    SolvePuzzle(grid);
-                    return true;
-                }
-                Debug.Log(snake.snakeID +""+ directions.Count);
-                 if (directions.Count == 0)
-                    return false;
 
-                foreach (string direction in directions)
-                {
-                    switch (direction)
-                    {
-                        case "right":
-                            int x = snake.allTile[index][0];
-                            int y = snake.allTile[index][1] + 1;
-                            if (head)
-                            {
-                                for (int j = 0; j < snake.allTile.Count; j++)
-                                {
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                    var tempx = snake.allTile[j][0];
-                                    var tempy = snake.allTile[j][1];
-                                    snake.allTile[j] = new int[] { x, y };
-                                    x = tempx;
-                                    y = tempy;
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                }    
-                            }
-                            else
-                            {
-                                for (int j = snake.allTile.Count -1; j >= 0; j--)
-                                {
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                    var tempx = snake.allTile[j][0];
-                                    var tempy = snake.allTile[j][1];
-                                    snake.allTile[j] =  new int[] { x, y };
-                                    x = tempx;
-                                    y = tempy;
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                }   
-                            }
-                            if (SolvePuzzle(grid))
-                                return true;
-                            else
-                            {
-                                 x = snake.allTile[index][0];
-                                 y = snake.allTile[index][1] - 1;
-                                if (head)
-                                {
-                                    for (int j = 0; j < snake.allTile.Count; j++)
-                                    {
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                        var tempx = snake.allTile[j][0];
-                                        var tempy = snake.allTile[j][1];
-                                        snake.allTile[j] = new int[] { x, y };
-                                        x = tempx;
-                                        y = tempy;
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                    }    
-                                }
-                                else
-                                {
-                                    for (int j = snake.allTile.Count -1; j >= 0; j--)
-                                    {
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                        var tempx = snake.allTile[j][0];
-                                        var tempy = snake.allTile[j][1];
-                                        snake.allTile[j] =  new int[] { x, y };
-                                        x = tempx;
-                                        y = tempy;
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                    }   
-                                }
-                            }
-                            break;
-                        case "left":
-                            x = snake.allTile[index][0];
-                            y = snake.allTile[index][1] - 1;
-                            if (head)
-                            {
-                                for (int j = 0; j < snake.allTile.Count; j++)
-                                {
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                    var tempx = snake.allTile[j][0];
-                                    var tempy = snake.allTile[j][1];
-                                    snake.allTile[j] = new int[] { x, y };
-                                    x = tempx;
-                                    y = tempy;
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                }    
-                            }
-                            else
-                            {
-                                for (int j = snake.allTile.Count -1; j >= 0; j--)
-                                {
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                    var tempx = snake.allTile[j][0];
-                                    var tempy = snake.allTile[j][1];
-                                    snake.allTile[j] =  new int[] { x, y };
-                                    x = tempx;
-                                    y = tempy;
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                }   
-                            }
-                            if (SolvePuzzle(grid))
-                                return true;
-                            else
-                            {
-                                 x = snake.allTile[index][0];
-                                 y = snake.allTile[index][1] + 1;
-                                if (head)
-                                {
-                                    for (int j = 0; j < snake.allTile.Count; j++)
-                                    {
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                        var tempx = snake.allTile[j][0];
-                                        var tempy = snake.allTile[j][1];
-                                        snake.allTile[j] = new int[] { x, y };
-                                        x = tempx;
-                                        y = tempy;
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                    }    
-                                }
-                                else
-                                {
-                                    for (int j = snake.allTile.Count -1; j >= 0; j--)
-                                    {
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                        var tempx = snake.allTile[j][0];
-                                        var tempy = snake.allTile[j][1];
-                                        snake.allTile[j] =  new int[] { x, y };
-                                        x = tempx;
-                                        y = tempy;
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                    }   
-                                }
-                            }
-                            break;
-                        case "up":
-                            x = snake.allTile[index][0] -1;
-                            y = snake.allTile[index][1] ;
-                            if (head)
-                            {
-                                for (int j = 0; j < snake.allTile.Count; j++)
-                                {
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                    var tempx = snake.allTile[j][0];
-                                    var tempy = snake.allTile[j][1];
-                                    snake.allTile[j] = new int[] { x, y };
-                                    x = tempx;
-                                    y = tempy;
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                }    
-                            }
-                            else
-                            {
-                                for (int j = snake.allTile.Count -1; j >= 0; j--)
-                                {
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                    var tempx = snake.allTile[j][0];
-                                    var tempy = snake.allTile[j][1];
-                                    snake.allTile[j] =  new int[] { x, y };
-                                    x = tempx;
-                                    y = tempy;
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                }   
-                            }
-                            if (SolvePuzzle(grid))
-                                return true;
-                            else
-                            {
-                                 x = snake.allTile[index][0] + 1;
-                                 y = snake.allTile[index][1];
-                                if (head)
-                                {
-                                    for (int j = 0; j < snake.allTile.Count; j++)
-                                    {
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                        var tempx = snake.allTile[j][0];
-                                        var tempy = snake.allTile[j][1];
-                                        snake.allTile[j] = new int[] { x, y };
-                                        x = tempx;
-                                        y = tempy;
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                    }    
-                                }
-                                else
-                                {
-                                    for (int j = snake.allTile.Count -1; j >= 0; j--)
-                                    {
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                        var tempx = snake.allTile[j][0];
-                                        var tempy = snake.allTile[j][1];
-                                        snake.allTile[j] =  new int[] { x, y };
-                                        x = tempx;
-                                        y = tempy;
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                    }   
-                                }
-                            }
-                            break;
-                        case "down":
-                            x = snake.allTile[index][0] + 1;
-                            y = snake.allTile[index][1] ;
-                            if (head)
-                            {
-                                for (int j = 0; j < snake.allTile.Count; j++)
-                                {
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                    var tempx = snake.allTile[j][0];
-                                    var tempy = snake.allTile[j][1];
-                                    snake.allTile[j] = new int[] { x, y };
-                                    x = tempx;
-                                    y = tempy;
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                }    
-                            }
-                            else
-                            {
-                                for (int j = snake.allTile.Count -1; j >= 0; j--)
-                                {
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                    var tempx = snake.allTile[j][0];
-                                    var tempy = snake.allTile[j][1];
-                                    snake.allTile[j] =  new int[] { x, y };
-                                    x = tempx;
-                                    y = tempy;
-                                    grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                }   
-                            }
-                            if (SolvePuzzle(grid))
-                                return true;
-                            else
-                            {
-                                 x = snake.allTile[index][0] -1;
-                                 y = snake.allTile[index][1];
-                                if (head)
-                                {
-                                    for (int j = 0; j < snake.allTile.Count; j++)
-                                    {
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                        var tempx = snake.allTile[j][0];
-                                        var tempy = snake.allTile[j][1];
-                                        snake.allTile[j] = new int[] { x, y };
-                                        x = tempx;
-                                        y = tempy;
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                    }    
-                                }
-                                else
-                                {
-                                    for (int j = snake.allTile.Count -1; j >= 0; j--)
-                                    {
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = 0;
-                                        var tempx = snake.allTile[j][0];
-                                        var tempy = snake.allTile[j][1];
-                                        snake.allTile[j] =  new int[] { x, y };
-                                        x = tempx;
-                                        y = tempy;
-                                        grid[snake.allTile[j][0], snake.allTile[j][1]] = snake.snakeID;
-                                    }   
-                                }
-                            }
-                            break;
-                    }
-                }
-               // return false;
+        foreach (var snake in allSnakes)
+        {
+            List<string> directions = new List<string>();
+            int[] startNode = snake.allTile[0];
+            int[] endNode = snake.hole;
+            
+            if (CheckCanMoveWithThisDirections(startNode[0], startNode[1] + 1, snake))
+            {
+                if (endNode[1] > startNode[1])
+                    directions.Insert(0, "right");
+                else
+                    directions.Add("right");
             }
+            if(CheckSnakeFindHole(startNode[0], startNode[0] + 1,snake))
+            {
+                allSnakes.Remove(snake);
+                SolvePuzzle(grid);
+                return true;
+            }
+            if (CheckCanMoveWithThisDirections(startNode[0], startNode[1] - 1, snake))
+            {
+                if (endNode[1] < startNode[1])
+                    directions.Insert(0, "left");
+                else
+                    directions.Add("left");
+            }
+            if(CheckSnakeFindHole(startNode[0], startNode[0] - 1,snake))
+            {
+                allSnakes.Remove(snake);
+                SolvePuzzle(grid);
+                return true;
+            }
+
+            if (CheckCanMoveWithThisDirections(startNode[0] + 1, startNode[1], snake))
+            {
+                if (endNode[0] > startNode[0])
+                    directions.Insert(0, "down");
+                else
+                    directions.Add("down");
+            }
+            if(CheckSnakeFindHole(startNode[0]  + 1, startNode[0] ,snake))
+            {
+                allSnakes.Remove(snake);
+                SolvePuzzle(grid);
+                return true;
+            }
+            if (CheckCanMoveWithThisDirections(startNode[0] - 1, startNode[1], snake))
+            {
+                if (endNode[0] < startNode[0])
+                    directions.Insert(0, "up");
+                else
+                    directions.Add("up");
+            }
+            if(CheckSnakeFindHole(startNode[0] - 1, startNode[0] ,snake))
+            {
+                allSnakes.Remove(snake);
+                SolvePuzzle(grid);
+                return true;
+            }
+
+            if (directions.Count == 0)
+                return false;
+            
+            List<int[]> tempTile = new List<int[]>();
+
+            foreach (var array in snake.allTile)
+            {
+                int[] newArray = new int[array.Length];
+                Array.Copy(array, newArray, array.Length);
+                tempTile.Add(newArray);
+            }
+
+            int[,] tempGrid = (int[,])grid.Clone();
+            foreach (string direction in directions)
+            {
+                switch (direction)
+                {
+                    case "right":
+
+                        int headX = snake.allTile[0][0];
+                        int headY = snake.allTile[0][1] + 1;
+
+                        for (int j = 0; j < snake.allTile.Count; j++)
+                        {
+                            int currentX = snake.allTile[j][0];
+                            int currentY = snake.allTile[j][1];
+
+                            grid[currentX, currentY] = 0;
+
+                            snake.allTile[j] = new int[] { headX, headY };
+
+                            grid[headX, headY] = snake.snakeID;
+
+                            headX = currentX;
+                            headY = currentY;
+                        }
+
+                        if (SolvePuzzle(grid))
+                            return true;
+                        else
+                        {
+                            snake.allTile.Clear();
+                            foreach (var array in tempTile)
+                            {
+                                int[] newArray = new int[array.Length];
+                                Array.Copy(array, newArray, array.Length);
+                                snake.allTile.Add(newArray);
+                            }
+                            grid = (int[,])tempGrid.Clone();
+                        }
+
+                        break;
+                    case "left":
+                         headX = snake.allTile[0][0];
+                         headY = snake.allTile[0][1] - 1;
+
+                        for (int j = 0; j < snake.allTile.Count; j++)
+                        {
+                            int currentX = snake.allTile[j][0];
+                            int currentY = snake.allTile[j][1];
+
+                            grid[currentX, currentY] = 0;
+
+                            snake.allTile[j] = new int[] { headX, headY };
+
+                            grid[headX, headY] = snake.snakeID;
+
+                            headX = currentX;
+                            headY = currentY;
+                        }
+
+                        if (SolvePuzzle(grid))
+                            return true;
+                        else
+                        {
+                            snake.allTile.Clear();
+                            foreach (var array in tempTile)
+                            {
+                                int[] newArray = new int[array.Length];
+                                Array.Copy(array, newArray, array.Length);
+                                snake.allTile.Add(newArray);
+                            }
+                            grid = (int[,])tempGrid.Clone();
+                        }
+                        break;
+                    case "up":
+                        headX = snake.allTile[0][0] - 1;
+                        headY = snake.allTile[0][1];
+
+                        for (int j = 0; j < snake.allTile.Count; j++)
+                        {
+                            int currentX = snake.allTile[j][0];
+                            int currentY = snake.allTile[j][1];
+
+                            grid[currentX, currentY] = 0;
+
+                            snake.allTile[j] = new int[] { headX, headY };
+
+                            grid[headX, headY] = snake.snakeID;
+
+                            headX = currentX;
+                            headY = currentY;
+                        }
+
+                        if (SolvePuzzle(grid))
+                            return true;
+                        else
+                        {
+                            snake.allTile.Clear();
+                            foreach (var array in tempTile)
+                            {
+                                int[] newArray = new int[array.Length];
+                                Array.Copy(array, newArray, array.Length);
+                                snake.allTile.Add(newArray);
+                            }
+                            grid = (int[,])tempGrid.Clone();
+                        }
+                        break;
+                    case "down":
+                        headX = snake.allTile[0][0] + 1;
+                        headY = snake.allTile[0][1];
+
+                        for (int j = 0; j < snake.allTile.Count; j++)
+                        {
+                            int currentX = snake.allTile[j][0];
+                            int currentY = snake.allTile[j][1];
+
+                            grid[currentX, currentY] = 0;
+
+                            snake.allTile[j] = new int[] { headX, headY };
+
+                            grid[headX, headY] = snake.snakeID;
+
+                            headX = currentX;
+                            headY = currentY;
+                        }
+
+                        if (SolvePuzzle(grid))
+                            return true;
+                        else
+                        {
+                            snake.allTile.Clear();
+                            foreach (var array in tempTile)
+                            {
+                                int[] newArray = new int[array.Length];
+                                Array.Copy(array, newArray, array.Length);
+                                snake.allTile.Add(newArray);
+                            }
+                            grid = (int[,])tempGrid.Clone();
+                        }
+                        break;
+                }
+            }
+
+            return false;
         }
         return false;
+    }
+
+    static List<T> ShuffleList<T>(List<T> list)
+    {
+        Random random = new Random();
+        List<T> newList = list.ToList(); // Tạo một bản sao của danh sách gốc
+        int n = newList.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = random.Next(n + 1);
+            (newList[k], newList[n]) = (newList[n], newList[k]);
+        }
+        return newList;
     }
 
     public bool Solved(int[,] grid)
     {
         if (allSnakes.Count > 0)
         {
-            
             return false;
         }
         Debug.Log("solved");
@@ -541,6 +452,7 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
         }
       
     }
+   
    
     
 }

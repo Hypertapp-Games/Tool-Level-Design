@@ -13,12 +13,12 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
     private int[,] grid = {
      {1, 1 ,  1, 1, 1, 1, 1, 1,  1 , 1},
      {1, 1 ,  1, 1, 1, 1, 1, 1,  1 , 1},
-     {1,004, 22,21, 0,31,32,33, 005, 1},
+     {1,104, 22,21, 0,31,32,33, 105, 1},
      {1, 1 , 23, 1, 0, 1, 1,34,  1 , 1},
      {1, 1 ,  0, 1, 0, 1, 1, 1,  1 , 1},
      {1, 1 , 51, 1, 0, 1, 1, 1,  1 , 1},
      {1, 1 , 52, 1, 0, 1, 1,44,  1 , 1},
-     {1,003, 53,54, 0,41,42,43, 002, 1},
+     {1,103, 53,54, 0,41,42,43, 102, 1},
      {1, 1 ,  1, 1, 1, 1, 1, 1,  1 , 1},
      {1, 1 ,  1, 1, 1, 1, 1, 1,  1 , 1}
     };
@@ -49,7 +49,7 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
         COLS = grid.GetLength(1);
         LoadSnakeFromMatrix();
         GenerateTileByMatrix();
-        SolvePuzzle(grid);
+        //(grid);
     }
     void LoadSnakeFromMatrix()
     {
@@ -65,7 +65,7 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
                     {
                         int id = Int32.Parse(cellValue[0].ToString());
 
-                        if (!allIdOfSnakes.TryAdd(id, new Snake(new List<int[]> { new int[] { row, column } }, new int[] { }, id)))
+                        if (!allIdOfSnakes.TryAdd(id, new Snake(new List<int[]> { new int[] { row, column } }, new int[] {0,0}, id)))
                         {
                             allIdOfSnakes[id].allTile.Add(new int[] { row, column });
                         }
@@ -97,9 +97,12 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
                 grid[e[0], e[1]] =  snake.Key; // delete number marked
                 temp.Add(e);
             }
+            Debug.Log(snake.Value.hole[0] + " "+snake.Value.hole[1]);
             allSnakes.Add(new Snake(temp,snake.Value.hole,snake.Key));
         }
-      
+
+        ReLoad();
+
     }
     public bool CheckCanMoveWithThisDirections(int row, int col , Snake snake)
     {
@@ -133,11 +136,45 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
         return false;
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            CallBackTracking();
+        }
+    
+    }
+
+    public List<Snake> tempListSnake;
+    public int[,] tempGrid;
+    private int checking = 0;
+    private int chk = 0;
+
+    void ReLoad()
+    {
+        tempListSnake = new List<Snake>(allSnakes);
+        tempGrid = (int[,])grid.Clone();
+    }
+    void CallBackTracking()
+    {
+        Debug.Log("new daily");
+        allSnakes.Clear();
+        allSnakes = new List<Snake>(tempListSnake);
+        grid = (int[,])tempGrid.Clone();
+        checking = 0;
+        chk++;
+        SolvePuzzle(grid);
+    }
+
     public bool SolvePuzzle(int[,] grid)
     {
         DrawGird();
-
-        //List<Snake> shuffledAllSnake = new List<Snake>(ShuffleList(allSnakes));
+        checking++;
+        if (checking == chk)
+        {  
+            return true;
+        }
+        List<Snake> shuffledAllSnake = new List<Snake>(ShuffleList(allSnakes));
 
         if (Solved(grid))
             return true;
@@ -155,12 +192,21 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
                 else
                     directions.Add("right");
             }
+            else
+            {
+                startNode = snake.allTile[^1];
+                if (endNode[1] > startNode[1])
+                    directions.Insert(0, "right_tail");
+                else
+                    directions.Add("right_tail");
+            }
             if(CheckSnakeFindHole(startNode[0], startNode[0] + 1,snake))
             {
                 allSnakes.Remove(snake);
                 SolvePuzzle(grid);
                 return true;
             }
+            startNode = snake.allTile[0];
             if (CheckCanMoveWithThisDirections(startNode[0], startNode[1] - 1, snake))
             {
                 if (endNode[1] < startNode[1])
@@ -168,13 +214,22 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
                 else
                     directions.Add("left");
             }
+            else
+            {
+                startNode = snake.allTile[^1];
+                if (endNode[1] > startNode[1])
+                    directions.Insert(0, "left_tail");
+                else
+                    directions.Add("left_tail");
+            }
+          
             if(CheckSnakeFindHole(startNode[0], startNode[0] - 1,snake))
             {
                 allSnakes.Remove(snake);
                 SolvePuzzle(grid);
                 return true;
             }
-
+            startNode = snake.allTile[0];
             if (CheckCanMoveWithThisDirections(startNode[0] + 1, startNode[1], snake))
             {
                 if (endNode[0] > startNode[0])
@@ -182,18 +237,35 @@ public class SnakeFindWayUseBackTracking : MonoBehaviour
                 else
                     directions.Add("down");
             }
+            else
+            {
+                startNode = snake.allTile[^1];
+                if (endNode[1] > startNode[1])
+                    directions.Insert(0, "down_tail");
+                else
+                    directions.Add("down_tail");
+            }
             if(CheckSnakeFindHole(startNode[0]  + 1, startNode[0] ,snake))
             {
                 allSnakes.Remove(snake);
                 SolvePuzzle(grid);
                 return true;
             }
+            startNode = snake.allTile[0];
             if (CheckCanMoveWithThisDirections(startNode[0] - 1, startNode[1], snake))
             {
                 if (endNode[0] < startNode[0])
                     directions.Insert(0, "up");
                 else
                     directions.Add("up");
+            }
+            else
+            {
+                startNode = snake.allTile[^1];
+                if (endNode[1] > startNode[1])
+                    directions.Insert(0, "up_tail");
+                else
+                    directions.Add("up_tail");
             }
             if(CheckSnakeFindHole(startNode[0] - 1, startNode[0] ,snake))
             {

@@ -20184,11 +20184,12 @@ MonoBehaviour:
   - {r: 1, g: 0.8296584, b: 0, a: 1}
   WidthInputField: {fileID: 448877134}
   HeightInputField: {fileID: 951578544}
-  filePath: Assets/ScreenCapture/arrayData27_12_2023 (12:38:43).txt
+  filePath: Assets/ScreenCapture/arrayData28_12_2023 (17:30:53).txt
   allSnakes: []
   CurrentCheck: 0
   numberCaptures: 100
   screenCapture: {fileID: 717705859}
+  maxStep: 6
 --- !u!4 &2026817825
 Transform:
   m_ObjectHideFlags: 0

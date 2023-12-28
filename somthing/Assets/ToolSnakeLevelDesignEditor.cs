@@ -1212,6 +1212,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
 
     public ScreenCapture screenCapture;
 
+    public int maxStep = 5;
+
     private Snake selectedSnake = new Snake();
 
     public void SnakeRandomDirectionMove_BtnClick()
@@ -1227,6 +1229,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
     {
         CurrentCheck = numberCaptures;
     }
+
+    private int maxStepMove = 0;
     public void SnakeRandomDirectionMove()
     {
         CurrentCheck++;
@@ -1265,8 +1269,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
             if (direction.Count > 0)
             {
                 string slecetedDirection = direction[UnityEngine.Random.Range(0, direction.Count)];
-
-                CheckDirectionInAStep(selectedSnake, slecetedDirection == "head");
+                maxStepMove = UnityEngine.Random.Range(2, maxStep);
+                CheckDirectionInAStep(selectedSnake, slecetedDirection == "head") ;
             }
             else
             {
@@ -1323,7 +1327,7 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
                 stt.Add(i);
             }
         }
-        if (stt.Count > 0)
+        if (stt.Count > 0 && maxStepMove > 0)
         {
             int a = UnityEngine.Random.Range(0, stt.Count);
             
@@ -1342,7 +1346,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
     }
     public void CheckDirectionInAStep(int x, int y ,Snake snake, int index, bool head)
     {
-        if (CheckDirectionCanMove(x, y, snake.allTile[index]))
+        maxStepMove--;
+        if (CheckDirectionCanMove(x, y, snake.allTile[index]) && maxStepMove > 0)
         {
             SnakeMove(x, y, snake, head);
             CheckDirectionInAStep(x, y, snake, index, head);
@@ -1350,7 +1355,6 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
         else
         {
             StartCoroutine(WaitForEndAStep(snake, head));
-            WaitForEndAStep(snake, head);
         }
     }
     void SnakeMove(int x, int y,Snake snake, bool head)

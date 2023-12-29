@@ -17034,7 +17034,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2026817824}
         m_TargetAssemblyTypeName: ToolSnakeLevelDesignEditor, Assembly-CSharp
-        m_MethodName: SnakeRandomDirectionMove_BtnClick
+        m_MethodName: RandomMode_Button
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -20184,12 +20184,13 @@ MonoBehaviour:
   - {r: 1, g: 0.8296584, b: 0, a: 1}
   WidthInputField: {fileID: 448877134}
   HeightInputField: {fileID: 951578544}
-  filePath: Assets/ScreenCapture/arrayData28_12_2023 (17:30:53).txt
+  filePath: Assets/Data/arrayData29_12_2023 (14:18:17).txt
   allSnakes: []
   CurrentCheck: 0
-  numberCaptures: 100
+  numberCaptures: 200
   screenCapture: {fileID: 717705859}
   maxStep: 6
+  removeSnake: 2
 --- !u!4 &2026817825
 Transform:
   m_ObjectHideFlags: 0

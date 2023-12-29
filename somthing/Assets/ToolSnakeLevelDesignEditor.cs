@@ -35,7 +35,7 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
     private Image currentButtonSelect;
 
     public List<Color> Colors;
-    private bool isPlayMode = false;
+    private int mode = 0; //  0 editmode,  1 play mode,  2 randommode
 
     public TMP_InputField WidthInputField;
     public TMP_InputField HeightInputField;
@@ -49,6 +49,7 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
         ChangeButtonColor();
         GenerateTileOnStart();
     }
+   
 
     // Input: Click On Tile Or Hole Button
     // Output: Save button color to "colorChange", button id to "id", button status(normal tile , hold) to "isHole", hightlight slected button
@@ -70,11 +71,11 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
 
     private void Update()
     {
-        if (!isPlayMode)
+        if (mode == 0)
         {
             DrawTile();
         }
-        else
+        else if(mode == 1)
         {
             ChoseSnake();
             SnakeDrag();
@@ -95,22 +96,52 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
     // Turn On PlayMode;
     public void PlayModeOn_Button()
     {
-        isPlayMode = true;
+        if (mode == 0)
+        {
+            CloneGrid();
+        }
+        mode = 1;
         PlayMode();
     }
 
     // Turn On EditMode;
     public void EditModeOn_Button()
     {
-        isPlayMode = false;
+        if (mode != 0)
+        {
+            ReGetValueOfGrid();
+        }
+        mode = 0;
     }
+
+    public void RandomMode_Button()
+    {
+        if (mode == 0)
+        {
+            CloneGrid();
+        }
+        mode = 2;
+        SnakeRandomDirectionMoveStart();
+    }
+    private int[,] cloneGird;
+    void CloneGrid()
+    {
+        cloneGird = (int[,])grid.Clone();
+    }
+
+    void ReGetValueOfGrid()
+    {
+        grid = (int[,])cloneGird.Clone();
+        LoadGridVisual();
+    }
+   
 
     // Input: Click on Export button
     // Output: Create filePath on ScreenCapture folder, call function SaveArrayToFile
     public void ExportBtnClick()
     {
         var time = DateTime.Now.ToString("dd_MM_yyyy (HH:mm:ss)");
-        string filePath = "Assets/ScreenCapture/arrayData" + time + ".txt";
+        string filePath = "Assets/Data/arrayData" + time + ".txt";
 
         SaveArrayToFile(filePath, grid);
 
@@ -718,7 +749,6 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
 
         if (isSnakeHead)
         {
-            Debug.Log(snakeIndex);
             currentX = allSnakes[snakeIndex].allTile[0].x;
             currentY = allSnakes[snakeIndex].allTile[0].y;
         }
@@ -1207,17 +1237,24 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
     public int CurrentCheck = 0;
 
     // Code di chuyển ngẫu nhiên 
-    [Header("Số ScreenCapture muốn trong 1 lần chạy ")]
+    [Header("Số lần chạy trong 1 lần random ")]
     public int numberCaptures = 100;
 
     public ScreenCapture screenCapture;
 
+    [Header("Số ô tối đa 1 con rắn đi được trong 1 lần chạy")]
     public int maxStep = 5;
 
     private Snake selectedSnake = new Snake();
 
-    public void SnakeRandomDirectionMove_BtnClick()
+  
+    public void StopMoveRandom()
     {
+        CurrentCheck = numberCaptures;
+    }
+    public void SnakeRandomDirectionMoveStart()
+    {
+        removeSnakeCount = 0;
         allIdOfSnakes.Clear();
         allSnakes.Clear();
         LoadSnakeFromMatrix();
@@ -1225,12 +1262,10 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
         CurrentCheck = 0;
         SnakeRandomDirectionMove();
     }
-    public void StopMoveRandom()
-    {
-        CurrentCheck = numberCaptures;
-    }
-
     private int maxStepMove = 0;
+    [Header("Số rắn muốn xoá ngẫu nhiên, tỷ lệ xoá lần thứ nhất là 70%, các lần tiếp theo sẽ giảm đi")]
+    public int removeSnake = 1;
+    private int removeSnakeCount = 0;
     public void SnakeRandomDirectionMove()
     {
         CurrentCheck++;
@@ -1250,6 +1285,20 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
             selectedSnake = movableSnakes[UnityEngine.Random.Range(0, movableSnakes.Count)];
         }
 
+        if (removeSnakeCount < removeSnake)
+        {
+            var randomNumber = UnityEngine.Random.Range(0, 100);
+            if (randomNumber < (70/(removeSnakeCount +1)*2))
+            {
+                Debug.Log("SnakeInHole");
+                ChangeValueOfTheMatrixBeforeSnakeMove(selectedSnake);
+                allSnakes.Remove(selectedSnake);
+                removeSnakeCount++;
+                SnakeRandomDirectionMove();
+                return;
+            }
+           
+        }
         if (selectedSnake.snakeID != 0)
         {
             List<string> direction = new List<string>();
@@ -1387,6 +1436,8 @@ public class ToolSnakeLevelDesignEditor : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         CheckDirectionInAStep(snake, head);
     }
+
+   
 
 }
     

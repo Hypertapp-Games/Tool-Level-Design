@@ -20184,7 +20184,7 @@ MonoBehaviour:
   - {r: 1, g: 0.8296584, b: 0, a: 1}
   WidthInputField: {fileID: 448877134}
   HeightInputField: {fileID: 951578544}
-  filePath: Assets/Data/arrayData29_12_2023 (14:18:17).txt
+  filePath: 
   allSnakes: []
   CurrentCheck: 0
   numberCaptures: 200
